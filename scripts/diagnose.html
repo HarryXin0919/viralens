@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>viralens · 完整报告</title>
+<script>/* 防闪烁:首帧前定好昼夜(默认按本地时间 7-19 = 浅色) */
+(function(){var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'){var h=new Date().getHours();t=(h>=7&&h<19)?'light':'dark';}document.documentElement.setAttribute('data-theme',t);})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#FD4E63; --brand-ink:#D5344E; --brand2:#FF3B3B;
+    --grad:linear-gradient(135deg,#FB7299 0%,#FF3B3B 100%);
+    --brand-soft:rgba(253,78,99,.12);
+    --bili:#FB7299; --yt:#FF0000; --ok:#1F9D55; --warn:#D98324;
+    --ink:#15181C; --muted:#6A7480; --faint:#9AA4AD;
+    --line:#EAEDF0; --card:#FFFFFF; --bg:#F6F7F9;
+    --nav-bg:rgba(255,255,255,.82);
+    --input-bg:#FFFFFF; --code-bg:#F0F2F4;
+    --thumb-bg:linear-gradient(135deg,#E6EAEE,#CFD6DD);
+    --radius:18px;
+    --shadow:0 1px 2px rgba(15,20,25,.04),0 18px 40px -30px rgba(15,20,25,.28);
+    --shadow-hover:0 6px 14px rgba(15,20,25,.07),0 26px 50px -28px rgba(15,20,25,.35);
+    --hero-glow:rgba(253,78,99,.28);
+    --hero-bg:linear-gradient(180deg,#FFF0F4 0%,#F6F7F9 86%);
+    --good-soft:rgba(31,157,85,.12); --warn-soft:rgba(217,131,36,.13);
+  }
+  html[data-theme="dark"]{
+    --brand:#FF6E83; --brand-ink:#FF6E83; --brand2:#FF5A5A;
+    --grad:linear-gradient(135deg,#FF8FB0 0%,#FF5A5A 100%);
+    --brand-soft:rgba(255,110,131,.16);
+    --bili:#FF8FB0; --yt:#FF4D4D; --ok:#37C871; --warn:#F3B24E;
+    --ink:#EDF0F3; --muted:#9BA7B3; --faint:#6C7783;
+    --line:#262C34; --card:#181C22; --bg:#0F1216;
+    --nav-bg:rgba(18,22,26,.80);
+    --input-bg:#1E232B; --code-bg:#222831;
+    --thumb-bg:linear-gradient(135deg,#222831,#181C22);
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 18px 40px -30px rgba(0,0,0,.7);
+    --shadow-hover:0 6px 14px rgba(0,0,0,.4),0 26px 50px -28px rgba(0,0,0,.82);
+    --hero-glow:rgba(255,90,110,.20);
+    --hero-bg:linear-gradient(180deg,#1A1320 0%,#0F1216 90%);
+    --good-soft:rgba(55,200,113,.13); --warn-soft:rgba(243,178,78,.15);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"Roboto","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  a{color:inherit;text-decoration:none}
+  html.theme-transition,html.theme-transition *{transition:background-color .5s ease,color .5s ease,border-color .5s ease,fill .5s ease,stroke .5s ease,box-shadow .5s ease !important}
+  .hero,.wrap{transition:opacity .2s ease}
+  body.lswitch .hero,body.lswitch .wrap{opacity:.25}
+
+  /* nav (与控制台一致) */
+  .nav{position:sticky;top:0;z-index:40;background:var(--nav-bg);backdrop-filter:saturate(180%) blur(14px);
+    -webkit-backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--line)}
+  .nav-inner{max-width:1080px;margin:0 auto;height:60px;padding:0 22px;display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand .mark{width:30px;height:30px;flex:none;border-radius:9px;box-shadow:0 4px 12px -4px var(--brand)}
+  .brand .bname{font-weight:900;font-size:19px;letter-spacing:-.02em}
+  .brand .bname .hl{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand .chip{font-size:12px;background:var(--brand-soft);color:var(--brand-ink);font-weight:600;padding:2px 9px;border-radius:999px;margin-left:2px}
+  .nav-tools{display:flex;align-items:center;gap:9px}
+  .nav-back{font-size:13px;font-weight:600;color:var(--muted);padding:0 12px;height:38px;display:inline-flex;
+    align-items:center;border:1px solid var(--line);border-radius:999px;background:var(--card);transition:border-color .15s,color .15s}
+  .nav-back:hover{border-color:var(--brand);color:var(--ink)}
+  .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;color:var(--ink);
+    background:var(--card);border:1px solid var(--line);border-radius:999px;cursor:pointer;transition:border-color .15s,background .15s,transform .12s}
+  .icon-btn:hover{border-color:var(--brand)} .icon-btn:active{transform:scale(.94)} .icon-btn svg{width:17px;height:17px}
+  .lang-btn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:13px;font-weight:700;color:var(--ink);
+    background:var(--card);border:1px solid var(--line);border-radius:999px;padding:0 15px;height:38px;cursor:pointer;transition:border-color .15s}
+  .lang-btn:hover{border-color:var(--brand)} .lang-btn svg{width:14px;height:14px;opacity:.7}
+
+  /* hero */
+  .hero{background:radial-gradient(620px 280px at 84% -30%,var(--hero-glow),transparent 72%),var(--hero-bg);border-bottom:1px solid var(--line)}
+  .hero-inner{max-width:1080px;margin:0 auto;padding:46px 22px 38px}
+  .hero h1{font-size:44px;font-weight:900;letter-spacing:-.04em;line-height:1}
+  .hero h1 .hl{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .desc{margin-top:12px;font-size:15px;color:var(--muted);max-width:680px;line-height:1.7}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 22px 90px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;margin-bottom:20px;box-shadow:var(--shadow)}
+  .card-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .sec-badge{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;
+    background:var(--brand-soft);color:var(--brand-ink);font-weight:900;font-size:15px;flex:none}
+  .card-head h2{font-size:19px;font-weight:700;letter-spacing:-.01em}
+  .sec-sub{font-size:13px;color:var(--muted);font-weight:500}
+
+  /* picker: 创作者 | 视频 两栏 */
+  .pick{display:grid;grid-template-columns:230px 1fr;gap:18px;margin-top:14px}
+  @media(max-width:680px){.pick{grid-template-columns:1fr}}
+  .pcol-h{font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:9px}
+  .clist{display:flex;flex-direction:column;gap:7px;max-height:430px;overflow:auto}
+  .crow{display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--line);border-radius:11px;
+    cursor:pointer;transition:border-color .14s,background .14s;text-align:left;background:var(--card);color:inherit;font:inherit}
+  .crow:hover{border-color:var(--brand)} .crow.on{border-color:var(--brand);background:var(--brand-soft)}
+  .crow .picons{display:flex;align-items:center;gap:3px;flex:none}
+  .crow .picon{width:16px;height:16px;display:block}
+  .crow .cn{font-size:13.5px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .crow .cc{font-size:11px;color:var(--faint);flex:none}
+  .privcard{padding:18px 20px}
+  .privbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .privh{font-size:15px;font-weight:600}
+  .privsub{font-size:12.5px;color:var(--muted);margin-top:4px;max-width:560px;line-height:1.5}
+  .privact{display:flex;align-items:center;gap:14px;flex:none}
+  .privbtn{display:inline-block;background:var(--grad);color:#fff;font-weight:600;font-size:13px;
+    padding:9px 17px;border-radius:9px;cursor:pointer;white-space:nowrap}
+  .privbtn:hover{filter:brightness(1.06)} .privbtn input{display:none}
+  .privtpl{font-size:12.5px;color:var(--brand-ink);text-decoration:none;border-bottom:1px dashed currentColor;cursor:pointer;white-space:nowrap}
+  .privmsg{margin-top:12px;font-size:13px;line-height:1.5}
+  .privmsg.ok{color:var(--brand-ink)} .privmsg.bad{color:var(--warn)} .privmsg:empty{display:none}
+  .vlist{display:flex;flex-direction:column;gap:8px;max-height:430px;overflow:auto;padding-right:4px}
+  .vrow{display:flex;gap:11px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:12px;
+    cursor:pointer;transition:border-color .14s,background .14s;background:var(--card);color:inherit;font:inherit;text-align:left;width:100%}
+  .vrow:hover{border-color:var(--brand)} .vrow.on{border-color:var(--brand);background:var(--brand-soft)}
+  .vrow .vt{width:78px;height:46px;flex:none;border-radius:8px;object-fit:cover;background:var(--thumb-bg)}
+  .vrow .vb{flex:1;min-width:0}
+  .vrow .vtitle{font-size:13px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .vrow .vmeta{font-size:11.5px;color:var(--muted);margin-top:3px;display:flex;gap:10px}
+  .vrow .vmeta b{color:var(--brand-ink);font-weight:700}
+  .vhint{color:var(--faint);font-size:13px;padding:30px 6px;text-align:center}
+
+  /* 诊断结果 */
+  .diag{margin-top:4px}
+  .vhdr{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+  .vhdr .cover{width:240px;aspect-ratio:16/9;border-radius:14px;object-fit:cover;background:var(--thumb-bg);flex:none;box-shadow:var(--shadow)}
+  .vhdr .vinfo{flex:1;min-width:230px}
+  .vhdr .vttl{font-size:20px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+  .vhdr .vsub{font-size:13px;color:var(--muted);margin-top:6px}
+  .vhdr .vsub .tg{color:var(--brand-ink);font-weight:600}
+  .stats{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px}
+  .stat .sv{font-size:18px;font-weight:800;letter-spacing:-.02em}
+  .stat .sl{font-size:11.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:4px}
+  .stat .sl svg{width:12px;height:12px;opacity:.6}
+
+  .summary{margin-top:20px;padding:15px 18px;border-radius:13px;background:var(--brand-soft);
+    border:1px solid var(--line);display:flex;align-items:center;gap:13px}
+  .summary .pic{font-size:22px;flex:none}
+  .summary .stxt{font-size:14.5px;font-weight:600;line-height:1.5}
+  .summary .scount{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+  .summary .scount .g{color:var(--ok)} .summary .scount .w{color:var(--warn)}
+
+  .dimt{font-size:13px;font-weight:700;color:var(--muted);margin:26px 0 12px;text-transform:none}
+  .dim{border:1px solid var(--line);border-left:4px solid var(--faint);border-radius:13px;padding:16px 18px;margin-bottom:13px;background:var(--card)}
+  .dim.good{border-left-color:var(--ok)} .dim.warn{border-left-color:var(--warn)} .dim.ok{border-left-color:var(--faint)} .dim.na{border-left-color:var(--line);opacity:.7}
+  .dim-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .dim-h .dn{font-size:15.5px;font-weight:700}
+  .badge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px}
+  .badge.good{background:var(--good-soft);color:var(--ok)} .badge.warn{background:var(--warn-soft);color:var(--warn)}
+  .badge.ok{background:rgba(140,150,160,.16);color:var(--muted)} .badge.na{background:rgba(140,150,160,.12);color:var(--faint)}
+  .dim-head{font-size:13.5px;color:var(--ink);margin-top:7px;line-height:1.6}
+  .metrics{margin-top:12px;display:flex;flex-direction:column;gap:9px}
+  .metric{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding-left:14px;position:relative}
+  .metric::before{content:"";position:absolute;left:0;top:7px;width:7px;height:7px;border-radius:50%;background:var(--faint)}
+  .metric.good::before{background:var(--ok)} .metric.warn::before{background:var(--warn)}
+  .metric .mn{font-size:13px;font-weight:600;min-width:96px}
+  .metric .mv{font-size:14px;font-weight:800;letter-spacing:-.01em}
+  .metric .mr{font-size:12px;color:var(--faint)}
+  .metric .madv{flex-basis:100%;font-size:12.5px;color:var(--warn);padding-left:0;margin-top:1px}
+  .advice{margin-top:13px;padding:11px 14px;border-radius:11px;background:var(--warn-soft);
+    font-size:13px;line-height:1.6;color:var(--ink);display:flex;gap:9px}
+  .advice .ai{flex:none;color:var(--warn);font-weight:800}
+
+  .pending{display:flex;gap:13px;flex-wrap:wrap;margin-top:6px}
+  .pcard{flex:1;min-width:200px;border:1px dashed var(--line);border-radius:13px;padding:15px 17px;background:var(--card);opacity:.85}
+  .pcard .pn{font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .pcard .ptag{font-size:10.5px;font-weight:700;color:var(--brand-ink);background:var(--brand-soft);padding:2px 8px;border-radius:999px}
+  .pcard .pnote{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+  .clipbtn{margin-top:15px;border:0;cursor:pointer;font:inherit;font-weight:600;font-size:14px;color:#fff;
+    background:var(--grad);padding:11px 21px;border-radius:11px;display:inline-flex;align-items:center;gap:8px;
+    box-shadow:0 5px 16px -5px var(--brand);transition:transform .15s ease,box-shadow .15s ease}
+  .clipbtn:hover{transform:translateY(-1px);box-shadow:0 8px 20px -6px var(--brand)}
+  .clipbtn:disabled{opacity:.6;cursor:default;transform:none;box-shadow:none}
+  .cliphint{font-size:12px;color:var(--muted);margin-top:9px;line-height:1.5}
+  .clipfail{font-size:13px;color:var(--warn);margin:4px 0 11px;line-height:1.55}
+  .opthumb{margin-top:11px;max-width:230px;width:100%;border-radius:10px;border:1px solid var(--line);display:block}
+  .opthumb-cap{font-size:11px;color:var(--muted);margin-top:5px}
+
+  /* 教学版 */
+  .teach{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  @media(max-width:680px){.teach{grid-template-columns:1fr}}
+  .tcard{border:1px solid var(--line);border-radius:13px;padding:16px 18px;background:var(--card)}
+  .tcard .th{font-size:14.5px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .tcard .th .ti{width:24px;height:24px;border-radius:7px;background:var(--brand-soft);color:var(--brand-ink);
+    display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex:none}
+  .tcard .tb{font-size:13px;color:var(--muted);line-height:1.65}
+  .tcard .tb b{color:var(--ink);font-weight:700}
+
+  .spinner{display:inline-block;width:18px;height:18px;border:2.5px solid var(--line);border-top-color:var(--brand);
+    border-radius:50%;animation:spin .7s linear infinite;vertical-align:-4px;margin-right:8px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loadbox{padding:40px 6px;text-align:center;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+  <nav class="nav"><div class="nav-inner">
+    <a class="brand" href="/">
+      <svg class="mark" viewBox="0 0 40 40">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#FB7299"/><stop offset="1" stop-color="#FF3B3B"/></linearGradient></defs>
+        <rect width="40" height="40" rx="11" fill="url(#lg)"/>
+        <circle cx="20" cy="20" r="9.4" fill="none" stroke="#fff" stroke-width="2.6"/>
+        <circle cx="20" cy="20" r="3.4" fill="#fff"/>
+        <circle cx="16.3" cy="16.3" r="1.5" fill="#fff" opacity=".85"/>
+      </svg>
+      <span class="bname">vira<span class="hl">lens</span></span>
+      <span class="chip" data-i18n="brandChip">完整报告</span>
+    </a>
+    <div class="nav-tools">
+      <a class="nav-back" href="/" data-i18n="backHome">← 控制台</a>
+      <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" aria-label="theme"></button>
+      <button class="lang-btn" onclick="toggleLang()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>
+        <span id="langLabel">EN</span>
+      </button>
+    </div>
+  </div></nav>
+
+  <header class="hero"><div class="hero-inner">
+    <h1 data-i18n="heroTitle">完整<span class="hl">报告</span></h1>
+    <div class="desc" data-i18n="heroDesc"></div>
+  </div></header>
+
+  <div class="wrap">
+
+    <!-- 选择器 -->
+    <div class="card">
+      <div class="card-head"><span class="sec-badge">1</span>
+        <h2 data-i18n="pickTitle">选一条视频</h2>
+        <span class="sec-sub" data-i18n="pickSub">先选创作者,再挑一条视频开始诊断</span>
+      </div>
+      <div class="pick">
+        <div>
+          <div class="pcol-h" data-i18n="pickCreator">创作者</div>
+          <div class="clist" id="clist"><div class="vhint" data-i18n="loadingList">加载中…</div></div>
+        </div>
+        <div>
+          <div class="pcol-h" data-i18n="pickVideo">视频(按播放排序)</div>
+          <div class="vlist" id="vlist"><div class="vhint" data-i18n="pickHint">← 先选左边的创作者</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 导入自己的后台数据(CSV) -->
+    <div class="card privcard" id="privCard" style="display:none">
+      <div class="privbar">
+        <div class="privtxt">
+          <div class="privh">📊 <span data-i18n="privTitle">导入我的后台数据</span></div>
+          <div class="privsub" id="privSub"></div>
+        </div>
+        <div class="privact">
+          <label class="privbtn"><span data-i18n="privPick">选择 CSV</span>
+            <input type="file" id="privFile" accept=".csv,text/csv" onchange="handlePrivFile(this)"></label>
+          <a class="privtpl" id="privTpl" href="#" onclick="downloadTemplate(event)" data-i18n="privTpl">下载模板</a>
+        </div>
+      </div>
+      <div class="privmsg" id="privMsg"></div>
+    </div>
+
+    <!-- 诊断结果 -->
+    <div class="card" id="diagCard" style="display:none">
+      <div class="card-head"><span class="sec-badge">2</span>
+        <h2 data-i18n="diagTitle">逐项诊断</h2>
+        <span class="sec-sub" data-i18n="diagSub">对照这个创作者自己的爆款</span>
+      </div>
+      <div id="diag"><div class="loadbox" data-i18n="diagEmpty">选一条视频开始诊断 ↑</div></div>
+    </div>
+
+    <!-- 教学版通用结论 -->
+    <div class="card">
+      <div class="card-head"><span class="sec-badge">3</span>
+        <h2 data-i18n="teachTitle">教学版:常见规律</h2>
+        <span class="sec-sub" data-i18n="teachSub">主要来自知识 + 娱乐区样本;不同分区效果不同 —— 按你的赛道挑着用</span>
+      </div>
+      <div class="teach" id="teach"></div>
+    </div>
+
+  </div>
+
+<script>
+/* ===== i18n ===== */
+const I18N = {
+  zh:{
+    brandChip:"完整报告", langBtn:"EN", backHome:"← 控制台",
+    heroTitle:'完整<span class="hl">报告</span>',
+    heroDesc:"选一位创作者、挑一条视频,逐项拆解封面 / 标题 / 互动 / 时长 —— 告诉你这条做对了什么、还能怎么改。不是泛泛而谈,每条都跟这个创作者自己的爆款比。",
+    pickTitle:"选一条视频", pickSub:"先选创作者,再挑一条视频开始诊断",
+    pickCreator:"创作者", pickVideo:"视频(按播放排序)", pickHint:"← 先选左边的创作者",
+    loadingList:"加载中…",
+    diagTitle:"逐项诊断", diagSub:"对照这个创作者自己的爆款", diagEmpty:"选一条视频开始诊断 ↑",
+    diagLoading:"诊断中…",
+    teachTitle:"教学版:常见规律", teachSub:"主要来自知识 + 娱乐区样本;不同分区效果不同 —— 按你的赛道挑着用",
+    sIntro:"整体", playL:"播放", likeL:"点赞", cmtL:"评论", durL:"时长", pubL:"发布",
+    dimsT:"逐项拆解", pendT:"开头镜头 + 配乐(需下载视频)",
+    clipBtn:"▶ 分析开头镜头 + 配乐", clipHint:"会下载这条视频开头约 45 秒,约 15–30 秒出结果(首次稍慢)",
+    clipLoading:"下载并分析开头中…(首次稍慢,请稍等)", clipDone:"开头 + 配乐(下载分析)",
+    clipErr:"这条没下成功", clipRetry:"重试",
+    privTitle:"导入我的后台数据", privPick:"选择 CSV", privTpl:"下载模板",
+    privEmpty:"有自己的后台数据?导入 CSV,完播率 / 点击率就会出现在诊断里(数据只存你本机)",
+    privReading:"读取中…", privUploading:"导入中…",
+    adviceL:"怎么改", lvGood:"做得好", lvOk:"尚可", lvWarn:"可改进", lvNa:"暂无数据",
+    medianL:"中位", trendL:"趋势",
+  },
+  en:{
+    brandChip:"Full Report", langBtn:"中", backHome:"← Console",
+    heroTitle:'Full <span class="hl">Report</span>',
+    heroDesc:"Pick a creator and a video, and get a per-dimension breakdown — cover, title, engagement, duration — telling you what this video did right and what to improve. Not generic: every metric is compared against this creator's own hits.",
+    pickTitle:"Pick a video", pickSub:"Choose a creator, then a video to diagnose",
+    pickCreator:"Creator", pickVideo:"Videos (by views)", pickHint:"← pick a creator first",
+    loadingList:"Loading…",
+    diagTitle:"Diagnosis", diagSub:"vs this creator's own hits", diagEmpty:"Pick a video to start ↑",
+    diagLoading:"Diagnosing…",
+    teachTitle:"Playbook: common patterns", teachSub:"Mostly from knowledge + entertainment creators — effect varies by niche, pick what fits",
+    sIntro:"Overall", playL:"Views", likeL:"Likes", cmtL:"Comments", durL:"Length", pubL:"Published",
+    dimsT:"Breakdown", pendT:"Opening shots + sound (needs download)",
+    clipBtn:"▶ Analyze opening + sound", clipHint:"Downloads ~45s of this video; ~15–30s to results (slower first time)",
+    clipLoading:"Downloading & analyzing the opening… (slower the first time)", clipDone:"Opening + sound (downloaded)",
+    clipErr:"Couldn't analyze this one", clipRetry:"Retry",
+    privTitle:"Import my own analytics", privPick:"Choose CSV", privTpl:"Template",
+    privEmpty:"Have your own dashboard data? Import a CSV — retention / CTR will appear in the diagnosis (stored only on your machine)",
+    privReading:"Reading…", privUploading:"Importing…",
+    adviceL:"Fix", lvGood:"Good", lvOk:"OK", lvWarn:"Improve", lvNa:"No data",
+    medianL:"median", trendL:"trend",
+  }
+};
+let lang = localStorage.getItem('lang') || 'zh';
+function L(){ return I18N[lang]; }
+function TT(x){ return (x && typeof x==='object') ? (x[lang]||x.zh||'') : (x==null?'':x); }
+function applyLang(){
+  document.documentElement.lang = lang==='zh'?'zh-CN':'en';
+  document.getElementById('langLabel').textContent = L().langBtn;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ const v=L()[el.dataset.i18n]; if(typeof v==='string') el.innerHTML=v; });
+}
+function toggleLang(){
+  lang = lang==='zh'?'en':'zh'; localStorage.setItem('lang',lang);
+  document.body.classList.add('lswitch');
+  setTimeout(()=>{ applyLang(); renderCreators(); if(CUR.alias) renderVideos(CUR.alias);
+    if(CUR.alias) showPrivCard(CUR.alias);
+    if(CUR.data) renderDiag(CUR.data); renderTeach();
+    document.body.classList.remove('lswitch'); }, 200);
+}
+
+/* ===== theme ===== */
+const ICON_MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+const ICON_SUN ='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+function curTheme(){ return document.documentElement.getAttribute('data-theme')||'light'; }
+function updateThemeBtn(){ document.getElementById('themeBtn').innerHTML = curTheme()==='dark'?ICON_SUN:ICON_MOON; }
+function toggleTheme(){
+  const next=curTheme()==='dark'?'light':'dark'; const root=document.documentElement;
+  root.classList.add('theme-transition'); void root.offsetWidth;
+  root.setAttribute('data-theme',next); localStorage.setItem('theme',next); updateThemeBtn();
+  setTimeout(()=>root.classList.remove('theme-transition'),550);
+}
+
+/* ===== helpers ===== */
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function trim1(x){ return (Math.round(x*10)/10).toString(); }
+function kfmt(n){ if(n==null||n==='')return'—'; n=Number(n); if(isNaN(n))return'—';
+  if(lang==='zh'){ if(n>=1e8)return trim1(n/1e8)+'亿'; if(n>=1e4)return trim1(n/1e4)+'万'; return n.toLocaleString(); }
+  if(n>=1e9)return trim1(n/1e9)+'B'; if(n>=1e6)return trim1(n/1e6)+'M'; if(n>=1e3)return trim1(n/1e3)+'K'; return String(n); }
+function hhmmss(s){ s=parseInt(s||0,10); if(!s)return'—'; const h=(s/3600)|0,m=(s%3600/60)|0,x=s%60,p=n=>String(n).padStart(2,'0'); return h?`${h}:${p(m)}:${p(x)}`:`${m}:${p(x)}`; }
+const ZONE_I18N={"知识":{zh:"知识",en:"Knowledge"},"科技":{zh:"科技",en:"Sci&Tech"},"数码":{zh:"数码",en:"Tech"},"生活":{zh:"生活",en:"Lifestyle"},"美食":{zh:"美食",en:"Food"},"游戏":{zh:"游戏",en:"Gaming"},"音乐":{zh:"音乐",en:"Music"},"舞蹈":{zh:"舞蹈",en:"Dance"},"影视":{zh:"影视",en:"Film&TV"},"动画":{zh:"动画",en:"Anime"},"鬼畜":{zh:"鬼畜",en:"Memes"},"时尚":{zh:"时尚",en:"Fashion"},"汽车":{zh:"汽车",en:"Auto"},"体育":{zh:"体育",en:"Sports"},"运动":{zh:"运动",en:"Sports"},"动物":{zh:"动物",en:"Animals"},"纪录片":{zh:"纪录片",en:"Documentary"},"资讯":{zh:"资讯",en:"News"},"娱乐":{zh:"娱乐",en:"Entertainment"},"搞笑":{zh:"搞笑",en:"Comedy"},"旅游":{zh:"旅游",en:"Travel"},"Entertainment-YT":{zh:"娱乐",en:"Entertainment"},"STEM-YT":{zh:"科普",en:"STEM"}};
+// 平台图标:bilibili 蓝色电视 logo / YouTube 红色播放键。传 "bilibili" / "youtube",
+// 也吃数组或 "bilibili,youtube"(同一人跨平台时两个图标都画)。
+function platSVG(p){
+  p=(p||'').toLowerCase();
+  if(p.indexOf('you')>=0||p==='yt')
+    return '<svg class="picon" viewBox="0 0 24 24" role="img" aria-label="YouTube"><title>YouTube</title>'
+      +'<path fill="#FF0000" d="M23.5 6.5a3 3 0 0 0-2.12-2.13C19.5 3.86 12 3.86 12 3.86s-7.5 0-9.38.51A3 3 0 0 0 .5 6.5 31.3 31.3 0 0 0 0 12a31.3 31.3 0 0 0 .5 5.5 3 3 0 0 0 2.12 2.13c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51A3 3 0 0 0 23.5 17.5 31.3 31.3 0 0 0 24 12a31.3 31.3 0 0 0-.5-5.5z"/>'
+      +'<path fill="#fff" d="M9.6 15.6V8.4l6.3 3.6z"/></svg>';
+  return '<svg class="picon" viewBox="0 0 24 24" role="img" aria-label="Bilibili"><title>Bilibili</title>'
+    +'<path fill="#00AEEC" d="M17.81 4.65h.85c1.51.05 2.77.58 3.77 1.57s1.53 2.25 1.56 3.76v7.36c-.03 1.51-.55 2.77-1.56 3.77s-2.26 1.52-3.77 1.56H5.33c-1.51-.04-2.77-.56-3.77-1.56S.04 18.86 0 17.35V9.99c.04-1.51.56-2.77 1.56-3.76S3.82 4.7 5.33 4.65h.78L4.93 3.53a1.23 1.23 0 0 1-.37-.91c0-.36.12-.66.37-.91l.03-.02c.27-.25.57-.37.92-.37s.65.12.92.37l2.86 2.84c.07.07.13.14.19.21h4.26a.84.84 0 0 1 .16-.21l2.85-2.74c.27-.25.57-.37.92-.37s.66.15.93.4.39.55.39.91-.12.66-.37.91zM5.33 7.24c-.75.02-1.37.28-1.88.77s-.77 1.13-.79 1.9v7.51c.02.77.28 1.4.79 1.9s1.13.75 1.88.77h13.34c.75-.02 1.37-.27 1.88-.77s.77-1.13.79-1.9V9.91c-.02-.76-.28-1.4-.79-1.9s-1.13-.75-1.88-.77zM8 11.11c.37 0 .68.12.93.37s.38.57.4.96v1.17c-.02.39-.15.71-.4.96s-.56.37-.93.37-.68-.12-.93-.37-.38-.57-.4-.96v-1.17c0-.39.13-.71.39-.96s.57-.37.94-.37zm8 0c.37 0 .68.12.93.37s.38.57.4.96v1.17c-.02.39-.15.71-.4.96s-.56.37-.93.37-.68-.12-.93-.37-.38-.57-.4-.96v-1.17c.02-.39.15-.71.4-.96s.56-.37.93-.37z"/></svg>';
+}
+function platIcons(platform){
+  const list=Array.isArray(platform)?platform:String(platform||'').split(/[^a-z]+/i).filter(Boolean);
+  return (list.length?list:['bilibili']).map(platSVG).join('');
+}
+function zoneLabel(z){ const m=ZONE_I18N[z]; return m?m[lang]:(z||''); }
+const IC={play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  like:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h2V9H2v12zm20-11a2 2 0 0 0-2-2h-6.31l.95-4.57.03-.32a1.5 1.5 0 0 0-.44-1.06L13.17 1 6.59 7.59A2 2 0 0 0 6 9v10a2 2 0 0 0 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>',
+  cmt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>'};
+
+/* ===== state ===== */
+let LIST=null;            // /api/diag/list
+let CUR={alias:null, vid:null, data:null};
+
+/* ===== picker ===== */
+function loadList(){
+  fetch('/api/diag/list').then(r=>r.json()).then(d=>{ LIST=d.creators||[]; renderCreators(); })
+    .catch(()=>{ document.getElementById('clist').innerHTML='<div class="vhint">加载失败,确认服务在跑</div>'; });
+}
+function renderCreators(){
+  if(!LIST) return;
+  const el=document.getElementById('clist');
+  el.innerHTML = LIST.map(c=>`
+    <button class="crow${c.alias===CUR.alias?' on':''}" onclick="selectCreator('${c.alias}')">
+      <span class="picons">${platIcons(c.platform)}</span>
+      <span class="cn">${esc(c.name)}</span>
+      <span class="cc">${zoneLabel(c.zone)} · ${c.count}</span>
+    </button>`).join('');
+}
+function selectCreator(alias){ CUR.alias=alias; renderCreators(); renderVideos(alias); showPrivCard(alias); }
+
+/* ===== 私有后台数据 CSV 导入 ===== */
+function showPrivCard(alias){
+  const card=document.getElementById('privCard'); if(!card) return;
+  card.style.display='block';
+  document.getElementById('privMsg').textContent='';
+  const sub=document.getElementById('privSub'); sub.textContent=L().privEmpty;
+  fetch('/api/private/status?alias='+encodeURIComponent(alias)).then(r=>r.json()).then(d=>{
+    if(d && d.n>0) sub.textContent = (lang==='zh'?`已导入 ${d.n} 条 · 重新选文件可覆盖更新`:`${d.n} videos imported · pick a file again to update`);
+  }).catch(()=>{});
+}
+function handlePrivFile(input){
+  const f=input.files && input.files[0]; if(!f||!CUR.alias) return;
+  const msg=document.getElementById('privMsg'); msg.className='privmsg'; msg.textContent=L().privReading;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    msg.textContent=L().privUploading;
+    fetch('/api/private/upload',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({alias:CUR.alias, csv:String(reader.result||'')})})
+      .then(r=>r.json()).then(d=>{
+        if(!d.ok){ msg.className='privmsg bad'; msg.textContent='✕ '+(d.error||'导入失败'); return; }
+        showPrivCard(CUR.alias);                        // 先刷状态(会清空 msg)
+        if(CUR.vid) selectVideo(CUR.alias, CUR.vid);    // 重新诊断,私有维度就出来了
+        const un = d.n_unmatched? (lang==='zh'?`,${d.n_unmatched} 条没对上(标题/ID 不匹配,跳过)`:`, ${d.n_unmatched} unmatched (title/ID mismatch, skipped)`):'';
+        msg.className='privmsg ok';                     // 再写结果,盖过上面的清空,让用户看得到
+        msg.textContent = (lang==='zh'?`✓ 导入 ${d.n_matched}/${d.n_rows} 条${un}`:`✓ Imported ${d.n_matched}/${d.n_rows}${un}`);
+      }).catch(()=>{ msg.className='privmsg bad'; msg.textContent='✕ '+(lang==='zh'?'请求失败':'request failed'); });
+  };
+  reader.readAsText(f); input.value='';
+}
+function downloadTemplate(ev){
+  ev.preventDefault();
+  const csv='﻿视频id,标题,完播率%,平均观看时长,点击率%,曝光量,播放量\n'+
+            'BV1example,示例-把这行换成你的视频(只填标题也能按标题对上),38,4:12,5.2,120000,45000\n';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='viralens_后台数据模板.csv'; a.click(); URL.revokeObjectURL(a.href);
+}
+function renderVideos(alias){
+  const c=(LIST||[]).find(x=>x.alias===alias); const el=document.getElementById('vlist');
+  if(!c){ el.innerHTML=`<div class="vhint">${L().pickHint}</div>`; return; }
+  el.innerHTML = c.videos.map(v=>`
+    <button class="vrow${v.vid===CUR.vid?' on':''}" onclick="selectVideo('${alias}','${v.vid}')">
+      <img class="vt" src="${esc(v.cover_url)}" referrerpolicy="no-referrer" loading="lazy" alt="">
+      <span class="vb">
+        <span class="vtitle">${esc(v.title)}</span>
+        <span class="vmeta"><span>${IC.play}<b> ${kfmt(v.play)}</b></span><span>${hhmmss(v.duration_sec)}</span><span>${v.published||''}</span></span>
+      </span>
+    </button>`).join('');
+}
+function selectVideo(alias, vid){
+  CUR.alias=alias; CUR.vid=vid; CUR.clip=null; CUR.clipLoading=false; renderVideos(alias);
+  document.getElementById('diagCard').style.display='';
+  document.getElementById('diag').innerHTML=`<div class="loadbox"><span class="spinner"></span>${L().diagLoading}</div>`;
+  document.getElementById('diagCard').scrollIntoView({behavior:'smooth',block:'start'});
+  fetch(`/api/diag/video?alias=${encodeURIComponent(alias)}&vid=${encodeURIComponent(vid)}`)
+    .then(r=>r.json()).then(d=>{ if(!d.ok){ document.getElementById('diag').innerHTML=`<div class="loadbox">${esc(d.error||'诊断失败')}</div>`; return; }
+      CUR.data=d; renderDiag(d); })
+    .catch(()=>{ document.getElementById('diag').innerHTML='<div class="loadbox">诊断请求失败</div>'; });
+}
+
+/* ===== render diagnosis ===== */
+function badge(lvl){ const w={good:L().lvGood,ok:L().lvOk,warn:L().lvWarn,na:L().lvNa}[lvl]||lvl;
+  return `<span class="badge ${lvl}">${w}</span>`; }
+function metricRow(m){
+  const lvl=m.level||'ok';
+  const adv=m.advice?`<span class="madv">↳ ${esc(TT(m.advice))}</span>`:'';
+  const why=m.why?` <span class="mr">· ${esc(TT(m.why))}</span>`:'';
+  return `<div class="metric ${lvl}">
+    <span class="mn">${esc(TT(m.name))}</span>
+    <span class="mv">${esc(TT(m.value))}</span>
+    <span class="mr">${esc(TT(m.ref))}</span>${why}${adv}</div>`;
+}
+function dimCard(d){
+  const metrics=(d.metrics||[]).map(metricRow).join('');
+  const adv=d.advice?`<div class="advice"><span class="ai">${L().adviceL} →</span><span>${esc(TT(d.advice))}</span></div>`:'';
+  const thumb=d.thumb?`<img class="opthumb" src="${d.thumb}" alt="">${d.thumb_cap?`<div class="opthumb-cap">${esc(TT(d.thumb_cap))}</div>`:''}`:'';
+  return `<div class="dim ${d.level}">
+    <div class="dim-h"><span class="dn">${esc(TT(d.label))}</span>${badge(d.level)}</div>
+    <div class="dim-head">${esc(TT(d.headline))}</div>
+    ${thumb}
+    ${metrics?`<div class="metrics">${metrics}</div>`:''}${adv}</div>`;
+}
+function renderDiag(d){
+  const v=d.video, ci=d.creator_info||{}, sm=d.summary||{};
+  const like = v.like==null ? '—' : kfmt(v.like);
+  const pic = sm.warn===0 ? '✅' : '🔧';
+  const head=`
+    <div class="vhdr">
+      <img class="cover" src="${esc(v.cover_url)}" referrerpolicy="no-referrer" alt="">
+      <div class="vinfo">
+        <div class="vttl">${esc(v.title)}</div>
+        <div class="vsub"><span class="tg">${esc(ci.name||v.creator)}</span> · ${zoneLabel(v.zone)}${ci.trend?` · ${L().trendL} ${esc(ci.trend)}`:''}</div>
+        <div class="stats">
+          <div class="stat"><div class="sv">${kfmt(v.play)}</div><div class="sl">${IC.play} ${L().playL}</div></div>
+          <div class="stat"><div class="sv">${like}</div><div class="sl">${IC.like} ${L().likeL}</div></div>
+          <div class="stat"><div class="sv">${kfmt(v.comment)}</div><div class="sl">${IC.cmt} ${L().cmtL}</div></div>
+          <div class="stat"><div class="sv">${hhmmss(v.duration_sec)}</div><div class="sl">${IC.clock} ${L().durL}</div></div>
+          <div class="stat"><div class="sv" style="font-size:13px;font-weight:700">${v.published||'—'}</div><div class="sl">${IC.cal} ${L().pubL}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="summary"><span class="pic">${pic}</span>
+      <div><div class="stxt">${esc(TT(sm.headline))}</div>
+      <div class="scount"><span class="g">${sm.good||0} ${L().lvGood}</span> · <span class="w">${sm.warn||0} ${L().lvWarn}</span></div></div>
+    </div>`;
+  const dims=`<div class="dimt">${L().dimsT}</div>`+ (d.dims||[]).map(dimCard).join('');
+  document.getElementById('diag').innerHTML = head + dims + `<div id="clipZone"></div>`;
+  renderClipZone();
+}
+
+/* ===== 视频下载层:开头镜头 + 配乐 (B 期) ===== */
+function renderClipZone(){
+  const z=document.getElementById('clipZone'); if(!z) return;
+  if(CUR.clipLoading){
+    z.innerHTML = `<div class="dimt">${L().pendT}</div><div class="loadbox"><span class="spinner"></span>${L().clipLoading}</div>`;
+    return;
+  }
+  const c=CUR.clip;
+  if(c && c.ok){
+    z.innerHTML = `<div class="dimt">${L().clipDone}</div>` + (c.dims||[]).map(dimCard).join('');
+    return;
+  }
+  if(c && !c.ok){
+    const hint = c.hint?`<div class="cliphint">${esc(TT(c.hint))}</div>`:'';
+    z.innerHTML = `<div class="dimt">${L().pendT}</div>`+
+      `<div class="clipfail">${L().clipErr}:${esc(c.error||'')}</div>${hint}`+
+      `<button class="clipbtn" onclick="runClip()">${L().clipRetry}</button>`;
+    return;
+  }
+  const d=CUR.data||{};
+  const cards=(d.pending||[]).map(p=>`<div class="pcard"><div class="pn">${esc(TT(p.label))}</div></div>`).join('');
+  z.innerHTML = `<div class="dimt">${L().pendT}</div><div class="pending">${cards}</div>`+
+    `<button class="clipbtn" onclick="runClip()">${esc(L().clipBtn)}</button>`+
+    `<div class="cliphint">${L().clipHint}</div>`;
+}
+function runClip(){
+  if(!CUR.alias||!CUR.vid) return;
+  CUR.clipLoading=true; CUR.clip=null; renderClipZone();
+  fetch(`/api/diag/clip?alias=${encodeURIComponent(CUR.alias)}&vid=${encodeURIComponent(CUR.vid)}`)
+    .then(r=>r.json())
+    .then(res=>{ CUR.clipLoading=false; CUR.clip=res; renderClipZone(); })
+    .catch(()=>{ CUR.clipLoading=false; CUR.clip={ok:false,error:'请求失败'}; renderClipZone(); });
+}
+
+/* ===== 教学版通用结论 (A4) ===== */
+const TEACH=[
+  {n:"1", h:{zh:"形式 > 选题",en:"Form beats topic"},
+   b:{zh:"同一个创作者,爆款和普通视频拉开差距的,往往不是选题本身,而是<b>形式落地</b>——封面够不够抓眼、开头 3 秒留不留得住人、节奏拖不拖。先把形式做扎实,再谈选题。",
+      en:"For the same creator, hits usually pull ahead not on topic but on <b>execution</b>—a punchy thumbnail, a gripping first 3 seconds, tight pacing. Nail the form before chasing topics."}},
+  {n:"2", h:{zh:'标题里对观众说"你"',en:'Say "you" in the title'},
+   b:{zh:"用<b>第二人称</b>把标题/开头变成对观众说话('你有没有想过…'),在我们样本里和更高的评论参与相关。把'介绍一个现象'改成'你正在被这个现象骗'。",
+      en:"Framing the title/opening as <b>second person</b> ('have you ever…') correlates with higher comment engagement in our sample. Turn 'here's a phenomenon' into 'you're being fooled by this'."}},
+  {n:"3", h:{zh:"封面三件套",en:"The cover trifecta"},
+   b:{zh:"爆款封面普遍<b>饱和度、对比度、色彩丰富度</b>都更高——颜色更跳、主体更分明。别让封面发灰发暗(亮度太低在小图里会糊成一团)。诊断里会直接拿你自己的爆款均值当尺子。",
+      en:"Hit thumbnails tend to score higher on <b>saturation, contrast, colorfulness</b>—punchier color, clearer subject. Don't let covers go gray or dark (low brightness turns to mush at thumbnail size). The diagnosis measures you against your own hits."}},
+  {n:"4", h:{zh:"前 3 秒定生死",en:"The first 3 seconds"},
+   b:{zh:"开头平铺直叙最劝退。前几句先抛一个<b>冲突 / 悬念 / 承诺</b>('看完这条,你再也不会…'),把最大爽点往前提,别留到中段。<br><span style='opacity:.7'>(音乐 / 美食 / Vlog 类:钩子可以是画面或氛围,不一定是一句话。)</span>",
+      en:"A flat opening is the biggest drop-off. Open with a <b>conflict / mystery / promise</b> and front-load the payoff—don't bury it mid-video.<br><span style='opacity:.7'>(Music / food / vlog: the hook can be a visual or a mood, not necessarily a line.)</span>"}},
+  {n:"5", h:{zh:"时长跟着分区走",en:"Match your zone's length"},
+   b:{zh:"没有'越长越好'。每个内容分区有自己的<b>舒适时长</b>,明显超出的视频完播率容易被拖累。诊断会拿同分区中位时长跟你这条比。",
+      en:"Longer isn't better. Each niche has a <b>comfortable length</b>; running well over it tends to hurt completion. The diagnosis compares your video to the zone's median length."}},
+  {n:"6", h:{zh:"评论比点赞更说明问题",en:"Comments tell you more than likes"},
+   b:{zh:"<b>评论率</b>反映'有没有留下可讨论的话题'。比同分区低,通常是内容没给观众开口的理由——结尾抛个开放问题或一个温和的争议点。",
+      en:"<b>Comment rate</b> reflects whether you left something worth discussing. Below your zone usually means no reason to speak up—end with an open question or a mild hot take."}},
+];
+function renderTeach(){
+  document.getElementById('teach').innerHTML = TEACH.map(t=>`
+    <div class="tcard"><div class="th"><span class="ti">${t.n}</span>${TT(t.h)}</div>
+    <div class="tb">${TT(t.b)}</div></div>`).join('');
+}
+
+/* ===== boot ===== */
+updateThemeBtn(); applyLang(); renderTeach(); loadList();
+</script>
+</body>
+</html>

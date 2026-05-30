@@ -1,0 +1,12 @@
+# 私密凭证 —— 绝不上传(SESSDATA 是登录令牌)
+config_local.py
+
+# 中间数据(体积大、含抓取内容,demo 用 reports/ 而非 data/)
+data/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
