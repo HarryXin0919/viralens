@@ -161,7 +161,7 @@ def fetch_creator(c, api_key, num=40):
     支持 creators.py 里的 per-creator 字段:
       min_duration_sec: 过滤掉短于该秒数的视频(默认 60,排除 YouTube Shorts)。
         Shorts/长视频在 YouTube 是两套算法+受众,混在一起 form 测试会失真。
-        长视频频道(如 Veritasium)默认 60 没有副作用;Shorts 大户(如 MrBeast)建议 180。
+        纯长视频频道默认 60 没有副作用;以 Shorts 为主的频道建议设到 180。
     """
     if not api_key:
         raise YouTubeError("没读到 YOUTUBE_API_KEY(在 config_local.py 里加一行 YOUTUBE_API_KEY = \"你的key\")")

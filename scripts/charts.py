@@ -39,10 +39,25 @@ HIT = "#E5484D"      # 爆款红
 FLOP = "#4C93FF"     # 翻车蓝
 GREY = "#D9D9D9"
 ZCOL = {"知识": ACCENT, "数码": "#8B7CF6", "生活": "#43B581", "美食": "#F2A33C", "游戏": "#EC6B9D"}
-# 长名 → 图上简称
-SHORT = {"妈咪说MommyTalk": "妈咪说", "李永乐老师官方": "李永乐", "无穷小亮的科普日常": "无穷小亮",
-         "老师好我叫何同学": "何同学", "极客湾Geekerwan": "极客湾", "房琪kiki": "房琪",
-         "美食作家王刚R": "王刚", "盗月社食遇记": "盗月社", "中国boy超级大猩猩": "中国boy"}
+# 匿名化:公开版图表不出现真实账号名 —— 用「分区 + 序号」代替(分区信息保留,身份隐去)
+_ZTAG = {"知识": "知识", "数码": "数码", "生活": "生活", "美食": "美食", "游戏": "游戏",
+         "Entertainment-YT": "娱乐", "STEM-YT": "科普"}
+
+
+def _build_anon():
+    cnt, out = {}, {}
+    for c in CREATORS:
+        tag = _ZTAG.get(c.get("zone", "?"), c.get("zone") or "其他")
+        cnt[tag] = cnt.get(tag, 0) + 1
+        out[c["name"]] = f"{tag} {cnt[tag]}"
+    return out
+
+
+ANON = _build_anon()
+
+
+def anon(name):
+    return ANON.get(name, "创作者")
 
 
 def fmt_play(n):
@@ -70,7 +85,7 @@ def chart_form_spread():
 
     ax.set_xscale("log")
     ax.set_yticks(range(len(rows)))
-    labels = ax.set_yticklabels([SHORT.get(r["creator"], r["creator"]) for r in rows], fontsize=11)
+    labels = ax.set_yticklabels([anon(r["creator"]) for r in rows], fontsize=11)
     for lab, r in zip(labels, rows):              # 名字按分区上色,凸显"各区都成立"
         lab.set_color(ZCOL.get(zone_of.get(r["creator"], "?"), "#333"))
     ax.set_xlabel("单条视频播放量(对数轴)", fontsize=10.5)
@@ -110,7 +125,7 @@ def chart_meme_falsified():
     """第二张:展示方法论严谨——我们杀死了自己的假设。
     '评论玩梗多 → 更容易爆款'?  实测高/低播放组的玩梗评论占比,假设预测红(高)>蓝(低)。"""
     data = json.loads((DATA / "cross_creator_meme.json").read_text(encoding="utf-8"))
-    names = [d["creator"].replace("MommyTalk", "").replace("官方", "") for d in data]
+    names = [anon(d["creator"]) for d in data]
     hi = [d["groups"]["高"]["meme_pct"] for d in data]
     lo = [d["groups"]["低"]["meme_pct"] for d in data]
 
@@ -164,7 +179,7 @@ def chart_2nd_person_falsified():
         e = cr.get("binary", {}).get("has_2nd_person")
         if e:
             nm = cr["creator"]
-            rows.append((SHORT.get(nm, nm), zone_of.get(nm, "?"), e["ratio"]))
+            rows.append((anon(nm), zone_of.get(nm, "?"), e["ratio"]))
     rows.sort(key=lambda r: -r[2])               # 倍数从高到低,跨过 1.0 基准线
     if not rows:
         print("  ✗ signal_scan.json 无 has_2nd_person 数据,跳过第三张")

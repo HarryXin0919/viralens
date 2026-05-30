@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="100%" role="img" aria-label="viralens — see what content form actually drives views">
+  <defs>
+    <linearGradient id="vg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FB7299"/>
+      <stop offset="1" stop-color="#FF3B3B"/>
+    </linearGradient>
+    <radialGradient id="vglow" cx="50%" cy="12%" r="62%">
+      <stop offset="0" stop-color="#FD4E63" stop-opacity=".30"/>
+      <stop offset="1" stop-color="#0F1216" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="300" rx="22" fill="#0F1216"/>
+  <rect width="1200" height="300" rx="22" fill="url(#vglow)"/>
+  <!-- lens / telescope motif -->
+  <g transform="translate(600,80)" fill="none" stroke="url(#vg)" stroke-linecap="round">
+    <circle r="30" stroke-width="5"/>
+    <circle r="13" stroke-width="3.5" opacity=".75"/>
+    <line x1="22" y1="22" x2="45" y2="45" stroke-width="7"/>
+    <circle cx="-42" cy="-20" r="2.6" fill="url(#vg)" stroke="none"/>
+    <circle cx="48" cy="-30" r="1.8" fill="url(#vg)" stroke="none"/>
+  </g>
+  <text x="600" y="198" text-anchor="middle" font-family="'Segoe UI',system-ui,Helvetica,Arial,sans-serif" font-weight="800" font-size="82" letter-spacing="-2" fill="url(#vg)">viralens</text>
+  <text x="600" y="240" text-anchor="middle" font-family="'Segoe UI',system-ui,Helvetica,Arial,sans-serif" font-weight="500" font-size="20" fill="#AEB7C2">see what content <tspan font-style="italic">form</tspan> actually drives views</text>
+  <text x="600" y="268" text-anchor="middle" font-family="'Segoe UI',system-ui,Helvetica,Arial,sans-serif" font-weight="400" font-size="16.5" fill="#6C7783">B站 / YouTube 创作者数据分析 · 假设驱动 · 开源</text>
+</svg>

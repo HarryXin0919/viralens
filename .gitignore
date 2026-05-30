@@ -4,6 +4,9 @@ config_local.py
 # 中间数据(体积大、含抓取内容,demo 用 reports/ 而非 data/)
 data/
 
+# 生成的交互报告里有真实创作者名 —— 不公开;用户用 --report 自己生成。匿名图表 reports/img/ 仍随仓库。
+reports/index.html
+
 # Python
 __pycache__/
 *.pyc
