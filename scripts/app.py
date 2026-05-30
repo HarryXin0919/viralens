@@ -283,6 +283,7 @@ class Handler(BaseHTTPRequestHandler):
                 slim.append({"creator": v.get("creator"), "platform": plat,
                              "title": v.get("title"), "play": v.get("play"),
                              "comment": v.get("comment"), "like": v.get("like"),
+                             "danmaku": v.get("danmaku"),   # B 站卡片用弹幕替点赞(YT 没弹幕)
                              "duration_sec": v.get("duration_sec"),
                              "cover_url": v.get("cover_url") or "",
                              "url": u,

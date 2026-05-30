@@ -529,7 +529,8 @@ function hhmmss(s){ s=parseInt(s||0,10); if(!s) return ''; const h=Math.floor(s/
 const IC = {
   play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
   like:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h2V9H2v12zm20-11a2 2 0 0 0-2-2h-6.31l.95-4.57.03-.32a1.5 1.5 0 0 0-.44-1.06L13.17 1 6.59 7.59A2 2 0 0 0 6 9v10a2 2 0 0 0 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>',
-  cmt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>'
+  cmt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>',
+  danmaku:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 5h14v2H2zM6 9.5h16v2H6zM2 14h11v2H2zM9 18.5h13v2H9z"/></svg>'
 };
 
 /* ——————————————————— platforms ——————————————————— */
@@ -624,6 +625,7 @@ function renderGrid(){
   const more=document.getElementById('vmore');
   if(!vids.length){ grid.innerHTML=`<div class="empty">${L().emptyData}</div>`; more.style.display='none'; return; }
   const show=vids.slice(0, PAGE*pageN);
+  const SL = (typeof lang!=='undefined'&&lang==='en') ? {p:'Views',l:'Likes',d:'Danmaku',c:'Comments'} : {p:'播放',l:'点赞',d:'弹幕',c:'评论'};
   grid.innerHTML = show.map(v=>{
     const yt=v.platform==='youtube', dur=hhmmss(v.duration_sec);
     const img = v.cover_url ? `<img src="${esc(v.cover_url)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.classList.add('broken')">` : '';
@@ -636,9 +638,10 @@ function renderGrid(){
         <div class="vtitle">${esc(v.title||'')}</div>
         <div class="vsub">${esc(v.creator||'')} · ${v.published||''}</div>
         <div class="vstats">
-          <span>${IC.play}${kfmt(v.play)}</span>
-          <span>${IC.like}${kfmt(v.like)}</span>
-          <span>${IC.cmt}${kfmt(v.comment)}</span>
+          <span title="${SL.p}">${IC.play}${kfmt(v.play)}</span>
+          ${yt ? `<span title="${SL.l}">${IC.like}${kfmt(v.like)}</span>`
+               : `<span title="${SL.d}">${IC.danmaku}${kfmt(v.danmaku)}</span>`}
+          <span title="${SL.c}">${IC.cmt}${kfmt(v.comment)}</span>
         </div>
       </div></a>`;
   }).join('');

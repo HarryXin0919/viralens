@@ -291,7 +291,7 @@ const I18N = {
     diagTitle:"逐项诊断", diagSub:"对照这个创作者自己的爆款", diagEmpty:"选一条视频开始诊断 ↑",
     diagLoading:"诊断中…",
     teachTitle:"教学版:常见规律", teachSub:"主要来自知识 + 娱乐区样本;不同分区效果不同 —— 按你的赛道挑着用",
-    sIntro:"整体", playL:"播放", likeL:"点赞", cmtL:"评论", durL:"时长", pubL:"发布",
+    sIntro:"整体", playL:"播放", likeL:"点赞", danmakuL:"弹幕", cmtL:"评论", durL:"时长", pubL:"发布",
     dimsT:"逐项拆解", pendT:"开头镜头 + 配乐(需下载视频)",
     clipBtn:"▶ 分析开头镜头 + 配乐", clipHint:"会下载这条视频开头约 45 秒,约 15–30 秒出结果(首次稍慢)",
     clipLoading:"下载并分析开头中…(首次稍慢,请稍等)", clipDone:"开头 + 配乐(下载分析)",
@@ -312,7 +312,7 @@ const I18N = {
     diagTitle:"Diagnosis", diagSub:"vs this creator's own hits", diagEmpty:"Pick a video to start ↑",
     diagLoading:"Diagnosing…",
     teachTitle:"Playbook: common patterns", teachSub:"Mostly from knowledge + entertainment creators — effect varies by niche, pick what fits",
-    sIntro:"Overall", playL:"Views", likeL:"Likes", cmtL:"Comments", durL:"Length", pubL:"Published",
+    sIntro:"Overall", playL:"Views", likeL:"Likes", danmakuL:"Danmaku", cmtL:"Comments", durL:"Length", pubL:"Published",
     dimsT:"Breakdown", pendT:"Opening shots + sound (needs download)",
     clipBtn:"▶ Analyze opening + sound", clipHint:"Downloads ~45s of this video; ~15–30s to results (slower first time)",
     clipLoading:"Downloading & analyzing the opening… (slower the first time)", clipDone:"Opening + sound (downloaded)",
@@ -381,7 +381,8 @@ const IC={play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11
   like:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 21h2V9H2v12zm20-11a2 2 0 0 0-2-2h-6.31l.95-4.57.03-.32a1.5 1.5 0 0 0-.44-1.06L13.17 1 6.59 7.59A2 2 0 0 0 6 9v10a2 2 0 0 0 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>',
   cmt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>',
   clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
-  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>'};
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
+  danmaku:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 5h14v2H2zM6 9.5h16v2H6zM2 14h11v2H2zM9 18.5h13v2H9z"/></svg>'};
 
 /* ===== state ===== */
 let LIST=null;            // /api/diag/list
@@ -488,7 +489,9 @@ function dimCard(d){
 }
 function renderDiag(d){
   const v=d.video, ci=d.creator_info||{}, sm=d.summary||{};
-  const like = v.like==null ? '—' : kfmt(v.like);
+  const isYT = v.platform==='youtube';   // B 站没点赞数,中间一栏用弹幕替(YouTube 没弹幕)
+  const midV = isYT ? (v.like==null?'—':kfmt(v.like)) : kfmt(v.danmaku);
+  const midL = isYT ? `${IC.like} ${L().likeL}` : `${IC.danmaku} ${L().danmakuL}`;
   const pic = sm.warn===0 ? '✅' : '🔧';
   const head=`
     <div class="vhdr">
@@ -498,7 +501,7 @@ function renderDiag(d){
         <div class="vsub"><span class="tg">${esc(ci.name||v.creator)}</span> · ${zoneLabel(v.zone)}${ci.trend?` · ${L().trendL} ${esc(ci.trend)}`:''}</div>
         <div class="stats">
           <div class="stat"><div class="sv">${kfmt(v.play)}</div><div class="sl">${IC.play} ${L().playL}</div></div>
-          <div class="stat"><div class="sv">${like}</div><div class="sl">${IC.like} ${L().likeL}</div></div>
+          <div class="stat"><div class="sv">${midV}</div><div class="sl">${midL}</div></div>
           <div class="stat"><div class="sv">${kfmt(v.comment)}</div><div class="sl">${IC.cmt} ${L().cmtL}</div></div>
           <div class="stat"><div class="sv">${hhmmss(v.duration_sec)}</div><div class="sl">${IC.clock} ${L().durL}</div></div>
           <div class="stat"><div class="sv" style="font-size:13px;font-weight:700">${v.published||'—'}</div><div class="sl">${IC.cal} ${L().pubL}</div></div>
