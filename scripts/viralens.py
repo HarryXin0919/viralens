@@ -45,6 +45,56 @@ def run(script, args=None, optional=False):
     return True
 
 
+def preflight():
+    """抓取前的友好自检:缺密钥 / 还没改创作者清单时,直接给出下一步,
+    而不是让后面的抓取逐条静默失败、最后拿空数据去分析。"""
+    problems = []
+
+    # 1) API 密钥:config_local.py 存在且至少填了一个
+    has_key = False
+    try:
+        import config_local
+        if getattr(config_local, "SESSDATA", "") or getattr(config_local, "YOUTUBE_API_KEY", ""):
+            has_key = True
+    except ImportError:
+        pass
+    if not has_key:
+        problems.append(
+            "还没配置 API 密钥。\n"
+            "       1) 复制 scripts/config_local.example.py 为 scripts/config_local.py\n"
+            "       2) 填入 SESSDATA(B站)或 YOUTUBE_API_KEY(YouTube),至少一个\n"
+            "       config_local.py 已被 .gitignore 排除,不会上传。"
+        )
+
+    # 2) 创作者清单:是否还停在示例占位
+    try:
+        from creators import CREATORS
+        real = [
+            c for c in CREATORS
+            if "示例" not in c.get("name", "")
+            and not str(c.get("alias", "")).startswith("demo_")
+            and c.get("name") != "Example Channel"
+        ]
+        if not real:
+            problems.append(
+                "创作者清单还是示例占位。\n"
+                "       编辑 scripts/creators.py,换成你想分析的 B站 / YouTube 创作者;\n"
+                "       想保留私有清单又不进 git,就放进 scripts/creators_local.py(自动覆盖)。"
+            )
+    except Exception:
+        pass
+
+    if problems:
+        print("\n" + "─" * 60)
+        print("⚠ 还差一步(viralens 启动自检):")
+        for i, p in enumerate(problems, 1):
+            print(f"\n  {i}. {p}")
+        print("\n" + "─" * 60)
+        print("把上面配好,再跑一次就行。")
+        print("已经有 data/ 数据、只想看分析?加 --no-fetch 跳过抓取。")
+        sys.exit(1)
+
+
 def main():
     argv = sys.argv[1:]
     if "-h" in argv or "--help" in argv:
@@ -63,6 +113,7 @@ def main():
     if no_fetch:
         print("\n(--no-fetch:跳过抓取,直接用 data/ 里已有的数据)")
     else:
+        preflight()
         run("fetch_multi.py", ["--force"] if force else [])
 
     if report_mode:
