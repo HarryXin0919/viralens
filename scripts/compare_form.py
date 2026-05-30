@@ -25,8 +25,8 @@ OFF_MARKERS = {
     "访谈": ["专访", "对谈", "采访", "对话"],
     "音乐": ["翻唱", "弹唱", "音乐区"],
     # 英文(给 YouTube 等英文标题用;只用多字符安全词,绝不误伤中文标题)
-    # 不包含 "livestream"/"live stream":Entertainment 创作者大量用 "secretly in X livestream"
-    # 作为招牌挑战(Airrack 等),误伤太大。真正的直播录像偏题标题通常含 "(Live)"/"VOD"/"Live Recording"。
+    # 不包含 "livestream"/"live stream":有些 Entertainment 创作者把 "secretly in X livestream"
+    # 当招牌挑战在用,误伤太大。真正的直播录像偏题标题通常含 "(Live)"/"VOD"/"Live Recording"。
     "EN": ["sponsored", "#ad", "(ad)", "[ad]", "paid promotion",
            "podcast", "q&a", "interview"],
 }

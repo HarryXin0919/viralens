@@ -2,6 +2,9 @@
 viralens 创作者配置(可提交,无密钥)。
 任意平台 / 任意分区 / 任意创作者 —— 想对比谁,就在这里加一行。
 
+⚠️ 想保留自己的私有清单又不进 git?把它放进同目录的 creators_local.py(已 gitignore),
+   在里面定义同样的 CREATORS 列表,它会自动覆盖下面的示例(见文件末尾)。
+
 每条字段:
   name      显示名
   platform  "bilibili"(默认,可省略)或 "youtube"
@@ -13,37 +16,24 @@ viralens 创作者配置(可提交,无密钥)。
   uid       B站用户 UID(数字)。留 None 由 00_resolve_creators.py 按 name 搜索补全
   —— YouTube 专用 ——
   channel   "@handle"(推荐,稳定可核对) / "UCxxxx频道ID" / 频道名(兜底搜索)
+  min_duration_sec  可选:过滤短视频(同时发 Shorts 的频道建议 180,排除 Shorts)
 """
+# 下面是示例 —— 换成你想分析的创作者。
+#   B站 UID:用 00_resolve_creators.py 按名字搜;YouTube @handle:在频道主页地址栏能看到。
 CREATORS = [
-    # ———————————————————————— Bilibili ————————————————————————
-    {"name": "毕导",              "platform": "bilibili", "uid": 254463269, "alias": "bidao",         "zone": "知识"},
-    {"name": "妈咪说MommyTalk",   "platform": "bilibili", "uid": 223146252, "alias": "mommytalk",     "zone": "知识"},
-    {"name": "李永乐老师官方",     "platform": "bilibili", "uid": 9458053,   "alias": "liyongle",      "zone": "知识"},
-    {"name": "无穷小亮的科普日常",  "platform": "bilibili", "uid": 14804670,  "alias": "xiaoliang",     "zone": "知识"},
-    {"name": "影视飓风",          "platform": "bilibili", "uid": 946974,    "alias": "yingshijufeng", "zone": "知识"},
-    {"name": "老师好我叫何同学",   "platform": "bilibili", "uid": 163637592, "alias": "hetongxue",     "zone": "知识"},
-    {"name": "钟文泽",            "platform": "bilibili", "uid": 25910292,  "alias": "zhongwenze",    "zone": "数码"},
-    {"name": "极客湾Geekerwan",   "platform": "bilibili", "uid": 25876945,  "alias": "geekerwan",     "zone": "数码"},
-    {"name": "itsRae",           "platform": "bilibili", "uid": 26770204,  "alias": "itsrae",        "zone": "生活"},
-    {"name": "房琪kiki",          "platform": "bilibili", "uid": 263223596, "alias": "fangqi",        "zone": "生活"},
-    {"name": "美食作家王刚R",      "platform": "bilibili", "uid": 290526283, "alias": "wanggang",      "zone": "美食"},
-    {"name": "盗月社食遇记",       "platform": "bilibili", "uid": 99157282,  "alias": "daoyueshe",     "zone": "美食"},
-    {"name": "老番茄",            "platform": "bilibili", "uid": 546195,    "alias": "laofanqie",     "zone": "游戏"},
-    {"name": "中国boy超级大猩猩",  "platform": "bilibili", "uid": 562197,    "alias": "chinaboy",      "zone": "游戏"},
+    # —— Bilibili(uid 留 None 会自动按 name 搜索补全)——
+    {"name": "示例UP主A", "platform": "bilibili", "uid": None, "alias": "demo_b1", "zone": "知识"},
+    {"name": "示例UP主B", "platform": "bilibili", "uid": None, "alias": "demo_b2", "zone": "游戏"},
 
-    # ——————————————— YouTube ———————————————
-    # 已填 YOUTUBE_API_KEY,跑 fetch_multi.py 会抓下面未注释的。
-
-    # —— Entertainment-YT(挑战 / 真人秀) ——
-    # min_duration_sec=180:这些频道都同时发 Shorts 和长视频,Shorts 是另一套算法+广告体系,form
-    # 测试必须排除。设 180s 把"Long Shorts"(1-2 分钟)也排掉,只留 3min+ 真长视频。
-    {"name": "MrBeast",      "platform": "youtube", "channel": "@MrBeast",      "alias": "mrbeast",    "zone": "Entertainment-YT", "min_duration_sec": 180},
-    {"name": "Dude Perfect", "platform": "youtube", "channel": "@DudePerfect",  "alias": "dudeperfect","zone": "Entertainment-YT", "min_duration_sec": 180},
-    {"name": "Airrack",      "platform": "youtube", "channel": "@airrack",      "alias": "airrack",    "zone": "Entertainment-YT", "min_duration_sec": 180},
-    {"name": "Ryan Trahan",  "platform": "youtube", "channel": "@ryan",         "alias": "ryantrahan", "zone": "Entertainment-YT", "min_duration_sec": 180},
-
-    # —— STEM-YT(待启用:第一次跑专注 MrBeast,以后做"中美 STEM 跨平台比较"再放开)——
-    # {"name": "Veritasium",   "platform": "youtube", "channel": "@veritasium",  "alias": "veritasium", "zone": "STEM-YT"},
-    # {"name": "3Blue1Brown",  "platform": "youtube", "channel": "@3blue1brown", "alias": "3b1b",       "zone": "STEM-YT"},
-    # {"name": "Mark Rober",   "platform": "youtube", "channel": "@MarkRober",   "alias": "markrober",  "zone": "STEM-YT"},
+    # —— YouTube(同时发 Shorts 的频道,min_duration_sec=180 排除 Shorts)——
+    {"name": "Example Channel", "platform": "youtube", "channel": "@example", "alias": "demo_y1",
+     "zone": "Entertainment-YT", "min_duration_sec": 180},
 ]
+
+# —— 你自己的私有清单 —— 放在 creators_local.py(已 gitignore,不进 git);存在就用它覆盖上面的示例。
+try:
+    from creators_local import CREATORS as _LOCAL_CREATORS
+    if _LOCAL_CREATORS:
+        CREATORS = _LOCAL_CREATORS
+except Exception:
+    pass

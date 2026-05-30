@@ -144,6 +144,7 @@ cp scripts/config_local.example.py scripts/config_local.py
 
 # 2. list the creators you want — any zone, any platform, mix freely
 #    edit scripts/creators.py   (one line per creator: name + platform + id + zone)
+#    prefer to keep your list private? put it in scripts/creators_local.py — git-ignored, auto-overrides the examples
 
 # 3a. JUST THE DATA — auto-calls the APIs, then hands you a clean table
 python scripts/viralens.py

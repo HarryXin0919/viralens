@@ -37,7 +37,7 @@ def classify(v):
         return "新发布(数据未成熟)"
     if tid != 201:
         return "官方活动/其他分区"
-    if "×" in title:                       # 【毕导×品牌】格式
+    if "×" in title:                       # 【UP主×品牌】格式
         return "商单合作"
     if "科研大赏" in desc:
         return "论文盘点(搞笑科研大赏)"

@@ -1,8 +1,7 @@
 """
 viralens · 01_fetch_videos.py
 抓一个 B 站 UP 主最近 N 个视频的元数据,输出 JSON 给后续分析用。
-
-毕导 UID = 254463269
+(这是早期单人脚本;多创作者请用 fetch_multi.py。)
 
 依赖:
     python -m pip install bilibili-api-python aiohttp
@@ -14,7 +13,7 @@ viralens · 01_fetch_videos.py
     3. 把 Value 粘贴到下方 SESSDATA 变量(引号内)
     4. 跑: python 01_fetch_videos.py
 
-输出: ../data/bidao_videos.json
+输出: ../data/<alias>_videos.json
 """
 import asyncio
 import json
@@ -25,7 +24,7 @@ from datetime import datetime
 from bilibili_api import user, Credential
 
 # ============ 配置 ============
-UID = 254463269             # 毕导
+UID = 0                     # 换成你要抓的 UP 主 UID(00_resolve_creators.py 可按名字查)
 NUM_VIDEOS = 30             # 抓最近多少个
 try:
     from config_local import SESSDATA   # ← SESSDATA 统一放 config_local.py(已 gitignore,不进 git)

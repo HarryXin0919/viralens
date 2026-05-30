@@ -8,7 +8,7 @@ creator_profile / fetch_covers)无需任何改动。
 拿 key:https://console.cloud.google.com → 新建项目 → 启用 "YouTube Data API v3" → 凭据 → API 密钥。
 
 creators.py 里 YouTube 创作者写法(platform 必须是 "youtube"):
-  {"name": "Veritasium", "platform": "youtube", "channel": "@veritasium", "alias": "veritasium", "zone": "STEM-YT"}
+  {"name": "Example Channel", "platform": "youtube", "channel": "@example", "alias": "demo_yt", "zone": "STEM-YT"}
 channel 支持三种写法:
   - "@handle"     (推荐,稳定、你能直接核对)
   - "UCxxxx..."   (频道 ID,以 UC 开头)
