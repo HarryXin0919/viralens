@@ -1,9 +1,9 @@
 """
-viralens · 02_classify_and_stats.py
+viralens · classify_and_stats.py
 读 bidao_videos.json,自动给视频打类型标签,按多个维度算对比统计。
 纯本地,零成本,零网络。
 
-跑: python 02_classify_and_stats.py
+跑: python classify_and_stats.py
 
 输出:
   - data/classified.json  (每个视频加了 type / 派生指标字段)

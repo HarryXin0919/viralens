@@ -1,5 +1,5 @@
 """
-viralens · 01_fetch_videos.py
+viralens · fetch_videos.py
 抓一个 B 站 UP 主最近 N 个视频的元数据,输出 JSON 给后续分析用。
 (这是早期单人脚本;多创作者请用 fetch_multi.py。)
 
@@ -11,7 +11,7 @@ viralens · 01_fetch_videos.py
     2. F12 → Application/存储 → Cookies → https://www.bilibili.com → 找 SESSDATA
        复制 Value(看起来像 "abc123%2Cxxxx%2Cyyy...")
     3. 把 Value 粘贴到下方 SESSDATA 变量(引号内)
-    4. 跑: python 01_fetch_videos.py
+    4. 跑: python fetch_videos.py
 
 输出: ../data/<alias>_videos.json
 """
@@ -24,7 +24,7 @@ from datetime import datetime
 from bilibili_api import user, Credential
 
 # ============ 配置 ============
-UID = 0                     # 换成你要抓的 UP 主 UID(00_resolve_creators.py 可按名字查)
+UID = 0                     # 换成你要抓的 UP 主 UID(resolve_creators.py 可按名字查)
 NUM_VIDEOS = 30             # 抓最近多少个
 try:
     from config_local import SESSDATA   # ← SESSDATA 统一放 config_local.py(已 gitignore,不进 git)

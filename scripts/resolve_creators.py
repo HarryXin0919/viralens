@@ -1,10 +1,10 @@
 """
-viralens · 00_resolve_creators.py
+viralens · resolve_creators.py
 按创作者名字搜 B站,补全 UID(选粉丝最多的账号,防同名假号)。
 跑完核对候选 → 我帮你把正确 UID 写回 creators.py。
 
 依赖: bilibili-api-python  /  SESSDATA 从 config_local.py 读
-跑: python 00_resolve_creators.py
+跑: python resolve_creators.py
 """
 import asyncio
 import sys

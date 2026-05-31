@@ -33,7 +33,7 @@ async def fetch_creator(c, sessdata, num=40, tries=4):
         raise RuntimeError("没读到 SESSDATA(config_local.py)")
     uid = c.get("uid")
     if not uid:
-        raise RuntimeError("缺 UID,先跑 00_resolve_creators.py")
+        raise RuntimeError("缺 UID,先跑 resolve_creators.py")
     cred = Credential(sessdata=sessdata)
     u = user.User(uid=uid, credential=cred)
     raw = None

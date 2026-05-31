@@ -185,7 +185,7 @@ python scripts/compare_meme.py       # (opt-in, slow) cross-creator comment-enga
 python scripts/fetch_covers.py       # (opt-in, slow) cover-image metrics
 ```
 
-Don't know a Bilibili creator's UID? Run `python scripts/00_resolve_creators.py` — it searches by
+Don't know a Bilibili creator's UID? Run `python scripts/resolve_creators.py` — it searches by
 name and prints the top candidates by follower count so you pick the real account, not an impersonator.
 
 ---
@@ -216,7 +216,7 @@ creators.py ──▶ fetch_multi.py ──▶ data/<alias>_videos.json        (
 - **Signal scanner** (`scan_signals`): turns each video into a universal feature vector, then auto-tests
   every dimension (title patterns, length buckets, daypart, cover metrics…) for high/low-play separation,
   ranks by effect size, and reports which levers are *universal* vs *creator-specific*.
-- **L2 — text** (`03_subtitle`, `05_comments`): subtitles + hot comments → `jieba` keyword analysis.
+- **L2 — text** (`subtitle`, `comments`): subtitles + hot comments → `jieba` keyword analysis.
 - **Cross-creator / cross-zone gate**: a pattern earns a ✅ only if it survives the *same test* on
   multiple independent creators **and** more than one zone.
 

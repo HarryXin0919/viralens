@@ -1,5 +1,5 @@
 """
-viralens · 05_comments.py
+viralens · comments.py
 抓 pilot 10 个视频(2025正经科普 高5+低5)的热评,做三类成分分析:
   共同 = 跨视频高频词(创作者标签性反馈,如"涨知识""哈哈哈")
   典型 = 单视频 TF-IDF top 词(这条视频独有的记忆点)
@@ -7,7 +7,7 @@ viralens · 05_comments.py
 
 依赖: bilibili-api-python jieba
 SESSDATA: 从 config_local.py 读(不进 git)
-跑: python 05_comments.py
+跑: python comments.py
 输出: data/comments_raw.json + data/comment_components.json + 终端三类成分
 """
 import asyncio

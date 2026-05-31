@@ -1,12 +1,12 @@
 """
-viralens · 03_subtitle.py
+viralens · subtitle.py
 抓 pilot 视频(2025正经科普 高5+低5)的 B站字幕,算"实验 vs 思辨"密度、语速、开场钩子。
 验证假设:高播放组 是不是 思辨密度更高、实验奇观更少。
 
 依赖: bilibili-api-python aiohttp (已装)
 SESSDATA: 从 01 脚本复制粘贴到下方
 
-跑: python 03_subtitle.py
+跑: python subtitle.py
 输出: data/subtitle_features.json + 终端高低组对比
 """
 import asyncio
