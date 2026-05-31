@@ -27,6 +27,11 @@ ROOT = HERE.parent                    # 仓库根
 DATA = ROOT / "data"
 REPORT = ROOT / "reports" / "index.html"
 
+# 让同目录的 creators.py / config_local.py 等无论以何种方式启动(直接跑文件 or
+# 安装为 `viralens` 命令)都能被 import 到。
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
 HELP = __doc__
 
 

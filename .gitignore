@@ -16,3 +16,8 @@ __pycache__/
 *.pyo
 .venv/
 venv/
+
+# python build artifacts
+*.egg-info/
+build/
+dist/

@@ -136,7 +136,7 @@ because `play_per_day` inflates new uploads) caught two real declines: **a lifes
 ```bash
 git clone https://github.com/HarryXin0919/viralens.git
 cd viralens
-pip install -r requirements.txt
+pip install -e .   # installs deps + the `viralens` command; not on PyPI yet
 
 # 1. add your API credentials (kept out of git — see Security below)
 cp scripts/config_local.example.py scripts/config_local.py

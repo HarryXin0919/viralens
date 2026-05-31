@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "viralens"
+version = "0.1.0"
+description = "Fetch + hypothesis-driven analysis for Bilibili & YouTube creators: pull video data and see which content form actually drives views."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Harry Xin" }]
+keywords = ["bilibili", "youtube", "creator-analytics", "data-analysis", "content-strategy"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+dependencies = [
+    "bilibili-api-python>=17.0.0",
+    "jieba>=0.42.1",
+    "matplotlib>=3.7.0",
+    "Pillow>=9.0.0",
+    "numpy>=1.23.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/HarryXin0919/viralens"
+Repository = "https://github.com/HarryXin0919/viralens"
+
+[project.scripts]
+viralens = "viralens:main"
+
+# The tool is a pipeline of co-located scripts dispatched by viralens.py via
+# subprocess; we install viralens.py as the top-level module that exposes the CLI.
+# The worker scripts live next to it in scripts/ and are run as files.
+[tool.setuptools]
+py-modules = ["viralens"]
+
+[tool.setuptools.package-dir]
+"" = "scripts"
