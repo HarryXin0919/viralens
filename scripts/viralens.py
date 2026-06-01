@@ -19,13 +19,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+import runtime                        # 收口「源码跑 vs 打包成 app 跑」的路径/子进程差异
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-HERE = Path(__file__).parent          # scripts/
-ROOT = HERE.parent                    # 仓库根
-DATA = ROOT / "data"
-REPORT = ROOT / "reports" / "index.html"
+HERE = runtime.ASSET_DIR              # scripts/(源码)或打包资源目录(app)
+DATA = runtime.DATA                   # 可写:源码=仓库/data,app=用户数据目录
+REPORT = runtime.REPORTS / "index.html"
 
 # 让同目录的 creators.py / config_local.py 等无论以何种方式启动(直接跑文件 or
 # 安装为 `viralens` 命令)都能被 import 到。
@@ -40,7 +41,7 @@ def run(script, args=None, optional=False):
     args = args or []
     label = script.replace(".py", "")
     print(f"\n──▶ {label} {' '.join(args)}".rstrip())
-    r = subprocess.run([sys.executable, str(HERE / script), *args])
+    r = subprocess.run(runtime.worker_cmd(script, args))   # 源码:[py, 脚本];app:[自己, --vl-exec, 模块]
     if r.returncode != 0:
         if optional:
             print(f"    ⚠ {label} 没跑成(returncode={r.returncode})—— 跳过,不影响前面的结果")

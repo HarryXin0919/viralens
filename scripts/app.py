@@ -24,17 +24,18 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
+import runtime                        # 收口「源码跑 vs 打包成 app 跑」的路径/子进程差异
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-HERE = Path(__file__).parent          # scripts/
-ROOT = HERE.parent                    # 仓库根
-DATA = ROOT / "data"
-REPORTS = ROOT / "reports"
-GUI = HERE / "gui.html"
-CONFIG = HERE / "config_local.py"
+HERE = runtime.ASSET_DIR              # scripts/(源码)或打包资源目录(app),只读
+DATA = runtime.DATA                   # 可写:源码=仓库/data,app=用户数据目录
+REPORTS = runtime.REPORTS
+GUI = runtime.ASSET_DIR / "gui.html"
+CONFIG = runtime.CONFIG               # 密钥文件:源码=scripts/,app=用户数据目录
 
-sys.path.insert(0, str(HERE))         # 让我们能 import creators / config_local
+# runtime 已把 ASSET_DIR / USER_DIR 放进 sys.path —— import creators / config_local 即可用
 
 # —— 跑流水线时的实时进度(后台线程写,/api/progress 读)——
 PROGRESS = {"running": False, "lines": [], "returncode": None, "mode": ""}
@@ -166,14 +167,15 @@ def diag_clip(alias, vid):
 
 # ——————————————————————— 跑流水线(后台线程) ———————————————————————
 def run_pipeline(mode, no_fetch, force, platforms=None):
-    cmd = [sys.executable, str(HERE / "viralens.py")]
+    extra = []
     if mode == "report":
-        cmd.append("--report")
+        extra.append("--report")
     if no_fetch:
-        cmd.append("--no-fetch")
+        extra.append("--no-fetch")
     if force:
-        cmd.append("--force")
-    shown = "viralens.py " + " ".join(cmd[2:])
+        extra.append("--force")
+    cmd = runtime.worker_cmd("viralens.py", extra)   # 源码:[py, viralens.py];app:[自己, --vl-exec, viralens]
+    shown = "viralens.py " + " ".join(extra)
     # 只抓用户在界面勾选的平台(通过环境变量传给 fetch_multi.py)
     env = os.environ.copy()
     if platforms:
@@ -181,9 +183,11 @@ def run_pipeline(mode, no_fetch, force, platforms=None):
     with LOCK:
         PROGRESS.update(running=True, lines=[f"$ {shown}"], returncode=None, mode=mode)
     try:
+        # 打包模式 cwd 用可写的用户目录(程序目录只读);源码模式保持 scripts/(行为不变)
+        cwd = str(runtime.USER_DIR) if runtime.FROZEN else str(HERE)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                              text=True, encoding="utf-8", errors="replace",
-                             bufsize=1, cwd=str(HERE), env=env)
+                             bufsize=1, cwd=cwd, env=env)
         for line in p.stdout:
             with LOCK:
                 PROGRESS["lines"].append(line.rstrip("\n"))
@@ -223,7 +227,7 @@ def do_import(path):
     for a, vs in groups.items():
         (DATA / f"{a}_videos.json").write_text(
             json.dumps(vs, ensure_ascii=False, indent=2), encoding="utf-8")
-    subprocess.run([sys.executable, str(HERE / "export_data.py")])
+    subprocess.run(runtime.worker_cmd("export_data.py"))
     return {"ok": True, "creators": len(groups), "videos": len(recs)}
 
 
