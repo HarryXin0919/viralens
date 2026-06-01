@@ -37,7 +37,7 @@ hiddenimports += ["matplotlib.backends.backend_agg", "numpy", "PIL"]
 hiddenimports += [
     "runtime", "app", "viralens",
     "fetch_multi", "fetch_bilibili", "fetch_youtube",
-    "compare_form", "creator_profile", "scan_signals", "charts", "export_data",
+    "compare_form", "creator_profile", "scan_signals", "charts", "export_data", "build_report",
     "diagnose", "analyze_video", "import_private",
     "creators", "features", "benchmarks",
     "classify_and_stats", "comments", "compare_meme", "fetch_covers",

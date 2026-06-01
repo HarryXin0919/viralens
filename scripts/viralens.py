@@ -129,6 +129,7 @@ def main():
         run("scan_signals.py")        # 多维信号扫描(哪些杠杆通用、哪些因人而异)
         run("charts.py", optional=True)  # README 配图(要 matplotlib;缺了不致命)
         run("export_data.py")         # 顺手也整理一份干净数据出来
+        run("build_report.py")        # 汇总成单个自包含 reports/index.html(可离线打开/转发)
         print("\n" + "=" * 60)
         print("✅ 全跑完了。")
         print(f"   交互报告 → {REPORT}")
