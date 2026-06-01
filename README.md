@@ -3,6 +3,7 @@
 <img src="banner.svg" alt="viralens" width="100%">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-FD4E63.svg)](LICENSE)
+&nbsp;[![Download](https://img.shields.io/badge/⬇%20Download-Win%20·%20Mac%20·%20Linux-2EA44F)](https://github.com/HarryXin0919/viralens/releases/latest)
 &nbsp;![Python](https://img.shields.io/badge/Python-3.10+-FD4E63)
 &nbsp;![Platforms](https://img.shields.io/badge/Bilibili%20+%20YouTube-FD4E63)
 &nbsp;![Approach](https://img.shields.io/badge/hypothesis--driven-✓-FD4E63)
