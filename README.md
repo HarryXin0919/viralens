@@ -136,7 +136,8 @@ because `play_per_day` inflates new uploads) caught two real declines: **a lifes
 ### Easiest: download the app — no Python, no install
 
 Grab the build for your OS from the **[latest release](https://github.com/HarryXin0919/viralens/releases/latest)**,
-unzip, and double-click. It opens the same local web UI in your browser — nothing leaves your machine.
+unzip, and double-click. It opens in **its own app window** — no terminal, no browser tab; nothing leaves your machine.
+(On a Linux box without a system WebView, it falls back to opening the UI in your browser.)
 
 | OS | File | Open it |
 |---|---|---|

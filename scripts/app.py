@@ -377,10 +377,17 @@ def find_port(start=8722):
     return start
 
 
-def main():
+def start_server():
+    """起本地服务器(后台守护线程),立刻返回 (server, url)。
+    打包后的「原生窗口 / 浏览器」入口用它先把服务器跑起来,再开窗口。"""
     port = find_port()
     srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    url = f"http://127.0.0.1:{port}"
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv, f"http://127.0.0.1:{port}"
+
+
+def main():
+    srv, url = start_server()
     print("=" * 56)
     print(f"  viralens 界面已启动 → {url}")
     print("  浏览器没自动开就手动复制上面这个地址。")
@@ -391,7 +398,7 @@ def main():
     except Exception:
         pass
     try:
-        srv.serve_forever()
+        threading.Event().wait()      # 一直挂着,等同 serve_forever(服务器在守护线程里)
     except KeyboardInterrupt:
         print("\n已停止。")
 

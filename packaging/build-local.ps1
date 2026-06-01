@@ -15,9 +15,9 @@ else { Write-Error "没找到 Python。先装 Python 3.10+ 并勾选 Add to PATH
 
 Write-Host "[*] 用解释器:" -NoNewline; & $py @pyArgs --version
 
-Write-Host "[*] 安装运行依赖(来自 pyproject)+ PyInstaller ..."
+Write-Host "[*] 安装运行依赖(来自 pyproject)+ 原生窗口后端 + PyInstaller ..."
 & $py @pyArgs -m pip install --upgrade pip
-& $py @pyArgs -m pip install -e .
+& $py @pyArgs -m pip install -e ".[gui]"    # [gui] = pywebview,双击弹原生窗口
 & $py @pyArgs -m pip install pyinstaller
 
 Write-Host "[*] 打包(onedir)..."

@@ -38,6 +38,12 @@ jobs:
           python -m pip install -e .
           python -m pip install pyinstaller
 
+      # 原生窗口后端只在 Windows/macOS 装(用系统自带 webview)。Linux 的 GTK webview
+      # 打包困难,故不装 —— Linux 包会自动回退到「开浏览器」(见 viralens_app.py)。
+      - name: Install native-window backend (Windows/macOS only)
+        if: runner.os != 'Linux'
+        run: python -m pip install pywebview
+
       - name: Build (PyInstaller, onedir)
         run: python -m PyInstaller --noconfirm --clean packaging/viralens.spec
 
@@ -91,6 +97,6 @@ jobs:
             > - **Windows**:若弹出「Windows 已保护你的电脑」,点 **更多信息 → 仍要运行**。
             > - **macOS**:先试 **右键 → 打开**;若提示「已损坏 / 无法验证开发者」(macOS 15 Sequoia 起常见),改去 **系统设置 → 隐私与安全性**,在底部点「**仍要打开**」;或在终端执行 `xattr -dr com.apple.quarantine /把/viralens.app/拖进来` 后再双击。
 
-            启动后浏览器会自动打开界面。首次在界面里填入你的 **B站 SESSDATA** 和/或 **YouTube API key** 即可开始抓取分析。
+            启动后会直接弹出 **viralens 应用窗口**(没有终端、没有浏览器标签页;没装系统 WebView 的部分 Linux 环境会自动回退到用浏览器打开)。首次在界面里填入你的 **B站 SESSDATA** 和/或 **YouTube API key** 即可开始抓取分析。
 
             > 可选功能「下视频分析开场镜头 + 配乐」需要自行安装 **ffmpeg**(其余抓取 / 分析 / 报告功能都无需它)。

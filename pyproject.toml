@@ -26,6 +26,10 @@ dependencies = [
     "numpy>=1.23.0",
 ]
 
+# 仅在「打包成桌面 app」时需要:原生窗口后端。源码 CLI / 网页界面都不依赖它。
+[project.optional-dependencies]
+gui = ["pywebview>=5.0"]
+
 [project.urls]
 Homepage = "https://github.com/HarryXin0919/viralens"
 Repository = "https://github.com/HarryXin0919/viralens"

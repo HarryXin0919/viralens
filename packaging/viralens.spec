@@ -31,6 +31,17 @@ for pkg in ("bilibili_api", "aiohttp", "jieba"):
 # matplotlib / numpy / Pillow 自带 PyInstaller hook,会自动带数据;这里补 Agg 后端保险
 hiddenimports += ["matplotlib.backends.backend_agg", "numpy", "PIL"]
 
+# 原生窗口后端(可选):装了 pywebview 就连同其平台后端一起收进来,实现「双击弹原生窗口」;
+# 没装(比如 Linux 不打包 webview)则打成「开浏览器」回退版 —— 入口 viralens_app.py 会自动判断。
+try:
+    import webview  # noqa: F401
+    _d, _b, _h = collect_all("webview")
+    datas += _d
+    binaries += _b
+    hiddenimports += _h
+except Exception:
+    pass
+
 # —— 项目自己的脚本 ——
 # app 懒加载它们、viralens 通过 `--vl-exec <模块名>` 用 runpy 跑它们,
 # 静态分析有可能看不全,这里全部显式声明,确保都被冻进去。
@@ -78,7 +89,7 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=False,
-    console=True,                     # 保留控制台:子进程 stdout 走管道给界面看进度 + 「关窗即停止」
+    console=False,                    # 窗口模式:不弹终端。子进程 stdout 由 viralens_app._ensure_std() 接回管道
     icon=(ICON if os.path.exists(ICON) else None),
 )
 
