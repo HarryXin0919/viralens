@@ -3,6 +3,7 @@
 <img src="banner.svg" alt="viralens" width="100%">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-FD4E63.svg)](LICENSE)
+&nbsp;[![Download](https://img.shields.io/badge/⬇%20Download-Win%20·%20Mac%20·%20Linux-2EA44F)](https://github.com/HarryXin0919/viralens/releases/latest)
 &nbsp;![Python](https://img.shields.io/badge/Python-3.10+-FD4E63)
 &nbsp;![Platforms](https://img.shields.io/badge/Bilibili%20+%20YouTube-FD4E63)
 &nbsp;![Approach](https://img.shields.io/badge/hypothesis--driven-✓-FD4E63)
@@ -133,6 +134,28 @@ because `play_per_day` inflates new uploads) caught two real declines: **a lifes
 
 ## Run it on *your* creators
 
+### Easiest: download the app — no Python, no install
+
+Grab the build for your OS from the **[latest release](https://github.com/HarryXin0919/viralens/releases/latest)**,
+unzip, and double-click. It opens in **its own app window** — no terminal, no browser tab; nothing leaves your machine.
+(On a Linux box without a system WebView, it falls back to opening the UI in your browser.)
+
+| OS | File | Open it |
+|---|---|---|
+| **Windows** | `viralens-windows-x64.zip` | unzip → run `viralens\viralens.exe` |
+| **macOS** (Apple Silicon) | `viralens-macos-arm64.zip` | unzip → `viralens.app` (see first-launch note below) |
+| **Linux** (x64) | `viralens-linux-x64.zip` | unzip → run `./viralens/viralens` |
+
+> **The first-launch security prompt is expected** — the app isn't code-signed (that needs paid Apple/Microsoft certificates), it isn't broken.
+> - **Windows:** if you see *"Windows protected your PC"*, click **More info → Run anyway**.
+> - **macOS:** try **right-click → Open** first; if it says *"damaged / can't verify developer"* (common since macOS 15 Sequoia), go to **System Settings → Privacy & Security** and click **Open Anyway** at the bottom — or run `xattr -dr com.apple.quarantine /path/to/viralens.app` in Terminal, then double-click.
+
+On first launch, paste your **Bilibili SESSDATA** and/or free **YouTube API key** right in the UI.
+Your keys and data are stored in your user folder (`%LOCALAPPDATA%\viralens` · `~/Library/Application Support/viralens` · `~/.local/share/viralens`), never inside the app or in git.
+The optional *opening-shots + BGM* analysis needs [ffmpeg](https://ffmpeg.org) installed; everything else works without it.
+
+### From source (for developers)
+
 ```bash
 git clone https://github.com/HarryXin0919/viralens.git
 cd viralens
@@ -248,6 +271,7 @@ rate-limit · small *n* is reported as *"weak signal,"* never dressed up as proo
 - [x] Cross-language extension to English YouTube (Entertainment-YT, 4 creators) — done; held without a counter-case
 - [x] One-command front door — `python viralens.py` (just the data → CSV/JSON) · `--report` (data + full analysis + report)
 - [x] Self-contained interactive HTML report — `reports/index.html`
+- [x] Downloadable desktop app for Windows / macOS / Linux — no Python install needed ([releases](https://github.com/HarryXin0919/viralens/releases/latest))
 - [ ] Per-creator (not keyword-based) signature-form definition
 - [ ] Opt-in LLM layer for qualitative "why this form works" summaries
 
@@ -288,8 +312,13 @@ viralens 是一个**取数 + 分析**的开源小工具。在一个配置文件�
 附带还能做:**分区基准**(把你放进同区"典型创作者"里定位)和**疲态检测**(只用满 30 天的成熟
 视频总播放判断你在涨还是在跌,已抓到生活区、美食区各一例真实下滑)。
 
-跑法见上方 **Run it on your creators**:改 `scripts/creators.py` 填你想看的任意 B站 / YouTube 创作者,
-然后 `python scripts/viralens.py`(只要数据)或 `python scripts/viralens.py --report`(数据 + 分析)。
+**怎么用 —— 最省事:下载桌面 app。** 到 **[Releases 页](https://github.com/HarryXin0919/viralens/releases/latest)**
+按系统下载(Windows / macOS / Linux),解压双击即用,**无需自己装 Python**;启动后浏览器自动打开界面,
+在里面填入你的 **B站 SESSDATA** 和/或 **YouTube API key** 即可。你的密钥与数据存在本机用户目录,绝不进 app 包、也不进 git。
+
+想从源码跑(开发者):见上方 **Run it on your creators** —— 改 `scripts/creators.py` 填你想看的任意 B站 / YouTube 创作者,
+然后 `python scripts/viralens.py`(只要数据)或 `python scripts/viralens.py --report`(数据 + 分析);
+也可 `python scripts/app.py` 开本地网页界面。
 
 ---
 

@@ -20,8 +20,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-DATA = Path(__file__).parent.parent / "data"
-DATA.mkdir(exist_ok=True)
+from runtime import DATA           # 可写数据目录(源码=仓库/data,app=用户目录;runtime 已自动建好)
 
 try:
     from config_local import SESSDATA

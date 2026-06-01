@@ -24,6 +24,7 @@ import base64
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -33,9 +34,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-HERE = Path(__file__).parent
-DATA = HERE.parent / "data"
-CLIPS = DATA / "clips"
+from runtime import DATA, CLIPS    # 源码=仓库/data,打包成 app 时=用户数据目录
 
 CLIP_SECONDS = 45          # 只下开头这么多秒
 SCENE_THRESH = 0.35        # 场景切换灵敏度(越低越敏感)
@@ -111,6 +110,22 @@ def _proxy():
         if v:
             return v
     return ""
+
+
+def _ffmpeg_available():
+    """这个『下视频分析开场+配乐』功能依赖 ffmpeg/ffprobe;其余功能都不需要。"""
+    return bool(shutil.which("ffmpeg") and shutil.which("ffprobe"))
+
+
+def _ffmpeg_missing_result(alias, vid):
+    tip = ("Windows: winget install Gyan.FFmpeg(或 ffmpeg.org 下载后加进 PATH)\n"
+           "  macOS:   brew install ffmpeg\n"
+           "  Linux:   sudo apt install ffmpeg")
+    return {"ok": False, "stage": "ffmpeg", "alias": alias, "vid": vid,
+            "error": "没检测到 ffmpeg —— 只有这个『下视频分析开场镜头+配乐』功能需要它。",
+            "hint": {"zh": "抓取 / 分析 / 报告等其余功能都不需要 ffmpeg。装好后重试:\n  " + tip,
+                     "en": "Everything else (fetch / analyze / report) works without ffmpeg. "
+                           "Install it and retry:\n  " + tip}}
 
 
 def _ffmpeg_fetch(url, out, dur, referer="https://www.bilibili.com/"):
@@ -390,6 +405,10 @@ def analyze(alias, vid, force=False):
             return cached
         except Exception:
             pass
+
+    # 缓存没命中才需要真去下视频 —— 这一步(且仅这一步)依赖 ffmpeg。缺了就优雅提示,不崩。
+    if not _ffmpeg_available():
+        return _ffmpeg_missing_result(alias, real_vid)
 
     with tempfile.TemporaryDirectory(prefix="viralens_clip_") as wd:
         try:

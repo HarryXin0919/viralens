@@ -30,7 +30,8 @@ try:
     from config_local import SESSDATA   # ← SESSDATA 统一放 config_local.py(已 gitignore,不进 git)
 except ImportError:
     SESSDATA = ""
-OUTPUT = Path(__file__).parent.parent / "data" / "bidao_videos.json"
+from runtime import DATA
+OUTPUT = DATA / "bidao_videos.json"
 # =============================
 
 

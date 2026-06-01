@@ -30,7 +30,7 @@ from PIL import Image
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-DATA = Path(__file__).parent.parent / "data"
+from runtime import DATA           # 源码=仓库/data,打包成 app 时=用户数据目录
 from creators import CREATORS
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",

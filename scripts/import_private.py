@@ -24,8 +24,7 @@ import benchmarks
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-HERE = Path(__file__).parent
-DATA = HERE.parent / "data"
+from runtime import DATA           # 源码=仓库/data,打包成 app 时=用户数据目录
 PRIV = DATA / "private"
 
 

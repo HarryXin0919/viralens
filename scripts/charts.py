@@ -29,9 +29,7 @@ plt.rcParams["font.sans-serif"] = [
 ]
 plt.rcParams["axes.unicode_minus"] = False
 
-ROOT = Path(__file__).parent.parent
-DATA = ROOT / "data"
-IMG = ROOT / "reports" / "img"
+from runtime import DATA, IMG, USER_DIR as ROOT   # 源码=仓库,打包成 app 时=用户数据目录(ROOT 仅用于打印相对路径)
 IMG.mkdir(parents=True, exist_ok=True)
 
 ACCENT = "#61C4E3"   # 项目主色

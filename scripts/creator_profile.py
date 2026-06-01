@@ -27,7 +27,7 @@ from statistics import median
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-DATA = Path(__file__).parent.parent / "data"
+from runtime import DATA           # 源码=仓库/data,打包成 app 时=用户数据目录
 from creators import CREATORS
 from features import extract
 from scan_signals import spearman      # 复用秩相关,避免重复实现

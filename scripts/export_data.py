@@ -18,7 +18,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-DATA = Path(__file__).parent.parent / "data"
+from runtime import DATA           # 源码=仓库/data,打包成 app 时=用户数据目录
 
 # CSV 里放哪些列、按什么顺序(挑人看得懂、Excel 排序有用的;长描述留在 JSON 里不塞 CSV)
 CSV_COLS = ["creator", "platform", "zone", "title", "play", "comment", "like",

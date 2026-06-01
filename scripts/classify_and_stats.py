@@ -15,7 +15,7 @@ from pathlib import Path
 from collections import defaultdict
 from statistics import median, mean
 
-DATA = Path(__file__).parent.parent / "data"
+from runtime import DATA           # 源码=仓库/data,打包成 app 时=用户数据目录
 IN = DATA / "bidao_videos.json"
 OUT = DATA / "classified.json"
 

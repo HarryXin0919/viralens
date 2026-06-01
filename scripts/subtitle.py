@@ -21,7 +21,7 @@ from bilibili_api import video, Credential
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")   # Win 控制台默认 GBK,强制 UTF-8 防 ✓/emoji 崩
 
-DATA = Path(__file__).parent.parent / "data"
+from runtime import DATA           # 源码=仓库/data,打包成 app 时=用户数据目录
 try:
     from config_local import SESSDATA   # ← 统一从 config_local.py 读(已 gitignore,不进 git)
 except ImportError:

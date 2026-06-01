@@ -25,7 +25,7 @@ import jieba.analyse
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")   # Win 控制台默认 GBK,强制 UTF-8
 
-DATA = Path(__file__).parent.parent / "data"
+from runtime import DATA           # 源码=仓库/data,打包成 app 时=用户数据目录
 try:
     from config_local import SESSDATA
 except ImportError:
