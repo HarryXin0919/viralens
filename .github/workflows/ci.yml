@@ -15,9 +15,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install (editable, deps from pyproject)
-        run: pip install -e .
+      - name: Install (editable + dev deps from pyproject)
+        run: pip install -e ".[dev]"
       - name: Syntax check (compile all scripts)
         run: python -m compileall scripts
       - name: Smoke test (console entry point)
         run: viralens --help
+      - name: Unit tests
+        run: pytest

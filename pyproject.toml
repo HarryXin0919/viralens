@@ -19,16 +19,17 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 dependencies = [
-    "bilibili-api-python>=17.0.0",
+    "bilibili-api-python>=17.0.0,<18.0.0",
     "jieba>=0.42.1",
     "matplotlib>=3.7.0",
     "Pillow>=9.0.0",
     "numpy>=1.23.0",
 ]
 
-# 仅在「打包成桌面 app」时需要:原生窗口后端。源码 CLI / 网页界面都不依赖它。
+# gui = 打包成桌面 app 时的原生窗口后端;dev = 跑测试。源码 CLI / 网页界面都不依赖它们。
 [project.optional-dependencies]
 gui = ["pywebview>=5.0"]
+dev = ["pytest>=7.0"]
 
 [project.urls]
 Homepage = "https://github.com/HarryXin0919/viralens"
@@ -45,3 +46,6 @@ py-modules = ["viralens"]
 
 [tool.setuptools.package-dir]
 "" = "scripts"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -31,7 +31,7 @@ try:
 except ImportError:
     YOUTUBE_API_KEY = ""
 
-from creators import CREATORS
+from creators import CREATORS, validate_creators
 
 NUM_VIDEOS = 40   # 每个创作者抓最近多少个
 
@@ -50,6 +50,12 @@ async def fetch_for(c):
 
 async def main():
     force = "--force" in sys.argv
+    problems = validate_creators()
+    if problems:
+        print("✗ creators.py 配置有误,请先修正:")
+        for p in problems:
+            print(f"    - {p}")
+        return
     # 界面勾选了哪些平台就只抓哪些(app.py 通过环境变量传入;空=全抓,命令行单跑时不受限)
     only = [p.strip().lower() for p in os.environ.get("VIRALENS_PLATFORMS", "").split(",") if p.strip()]
     if only:

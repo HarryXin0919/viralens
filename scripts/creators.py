@@ -37,3 +37,38 @@ try:
         CREATORS = _LOCAL_CREATORS
 except Exception:
     pass
+
+
+def validate_creators(creators=None):
+    """校验 CREATORS 配置,返回问题清单(空 = 没问题)。一次列出所有问题,
+    而不是抓取时才因 KeyError 崩在第一条。常见拼错(zon→zone)、缺 alias、
+    alias 重复(输出文件互相覆盖)、YouTube 缺 channel 都会被这里抓出来。"""
+    creators = CREATORS if creators is None else creators
+    if not isinstance(creators, list) or not creators:
+        return ["CREATORS 必须是非空列表"]
+    known = {"name", "alias", "zone", "platform", "uid", "channel", "min_duration_sec"}
+    problems, seen = [], set()
+    for i, c in enumerate(creators):
+        if not isinstance(c, dict):
+            problems.append(f"CREATORS[{i}]: 每条必须是 dict")
+            continue
+        where = f"CREATORS[{i}]「{c.get('name', '?')}」"
+        for req in ("name", "alias", "zone"):
+            if not c.get(req):
+                problems.append(f"{where}: 缺必填字段 '{req}'")
+        alias = c.get("alias")
+        if isinstance(alias, str) and alias:
+            if alias in seen:
+                problems.append(f"{where}: alias '{alias}' 重复 —— 输出文件会互相覆盖")
+            seen.add(alias)
+        elif alias is not None and not isinstance(alias, str):
+            problems.append(f"{where}: alias 必须是字符串")
+        plat = (c.get("platform") or "bilibili").lower()
+        if plat not in ("bilibili", "youtube"):
+            problems.append(f"{where}: 未知 platform '{plat}'(支持 bilibili / youtube)")
+        if plat == "youtube" and not c.get("channel"):
+            problems.append(f"{where}: youtube 创作者需要 'channel' 字段(@handle / UC.. / 频道名)")
+        for k in c:
+            if k not in known:
+                problems.append(f"{where}: 未知字段 '{k}'(拼错了?已知:{', '.join(sorted(known))})")
+    return problems

@@ -16,9 +16,9 @@ viralens · analyze_video.py —— B 期『视频下载层』。
 按需调用:用户在诊断页点「分析开头+配乐」才下这一条,不批量下 700 条。
 
 命令行单测:
-    python analyze_video.py bidao BV1mT421Y7mE
-    python analyze_video.py mrbeast 0BjlBnfHcHM
-    python analyze_video.py bidao BV1mT421Y7mE --force   # 忽略缓存重算
+    python analyze_video.py <alias> <vid>            # 如 demo_b1 BVxxxxxxxxxx
+    python analyze_video.py <alias> <youtube_vid>    # YouTube 视频 id
+    python analyze_video.py <alias> <vid> --force    # 忽略缓存重算
 """
 import base64
 import json

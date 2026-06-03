@@ -50,9 +50,9 @@ hiddenimports += [
     "fetch_multi", "fetch_bilibili", "fetch_youtube",
     "compare_form", "creator_profile", "scan_signals", "charts", "export_data", "build_report",
     "diagnose", "analyze_video", "import_private",
-    "creators", "features", "benchmarks",
-    "classify_and_stats", "comments", "compare_meme", "fetch_covers",
-    "fetch_videos", "resolve_creators", "subtitle",
+    "creators", "features", "benchmarks", "shared_markers", "schema",
+    "compare_meme", "fetch_covers",
+    "resolve_creators",
 ]
 
 # —— 只读资源:网页界面 + 配置模板 —— 放进打包根目录,app.py 用 runtime.ASSET_DIR 找它们 ——
