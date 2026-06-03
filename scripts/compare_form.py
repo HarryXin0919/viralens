@@ -17,19 +17,8 @@ if hasattr(sys.stdout, "reconfigure"):
 from runtime import DATA           # 源码=仓库/data,打包成 app 时=用户数据目录
 from creators import CREATORS
 
-# 偏离核心形式的粗标记(宁紧勿松,误判靠人眼复核打印的标题)
-OFF_MARKERS = {
-    "商单": ["×", "合作", "赞助", "广告", "推广"],
-    "vlog": ["vlog"],
-    "直播": ["直播回放", "录播", "直播录"],
-    "访谈": ["专访", "对谈", "采访", "对话"],
-    "音乐": ["翻唱", "弹唱", "音乐区"],
-    # 英文(给 YouTube 等英文标题用;只用多字符安全词,绝不误伤中文标题)
-    # 不包含 "livestream"/"live stream":有些 Entertainment 创作者把 "secretly in X livestream"
-    # 当招牌挑战在用,误伤太大。真正的直播录像偏题标题通常含 "(Live)"/"VOD"/"Live Recording"。
-    "EN": ["sponsored", "#ad", "(ad)", "[ad]", "paid promotion",
-           "podcast", "q&a", "interview"],
-}
+# 偏离核心形式的关键词 —— 单一数据源在 shared_markers.py(对比报告用保守口径版)。
+from shared_markers import OFF_MARKERS_COMPARE as OFF_MARKERS
 
 
 def off_tag(v):

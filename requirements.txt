@@ -1,6 +1,6 @@
 # viralens — runtime dependencies
 # Install:  pip install -r requirements.txt
-bilibili-api-python>=17.0.0   # async Bilibili public-data access
+bilibili-api-python>=17.0.0,<18.0.0   # async Bilibili public-data access (cap: 18.x may break API)
 jieba>=0.42.1                 # Chinese word segmentation (comment keyword analysis)
 matplotlib>=3.7.0             # static README charts (PNG)
 Pillow>=9.0.0                 # cover-image analysis (optional step: fetch_covers.py)

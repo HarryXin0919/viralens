@@ -6,8 +6,8 @@ viralens · diagnose.py —— 单条视频的「个性化诊断大脑」。
 全部中英双语。供 app.py 的 /api/diag 调用;也能命令行单测:
 
     python diagnose.py                 # 列个例子
-    python diagnose.py bidao BV1gcfWYqEsf
-    python diagnose.py mrbeast <vid>
+    python diagnose.py <alias> <vid>             # 如 demo_b1 BVxxxxxxxxxx
+    python diagnose.py <alias> <youtube_vid>
 
 核心思路:不泛泛而谈。每条视频都跟「这个创作者自己的爆款」对照 ——
 你自己的高播放视频封面平均饱和度多少?这条够不够?差在哪?该怎么调?

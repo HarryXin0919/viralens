@@ -9,17 +9,8 @@ viralens · features.py
 import re
 from datetime import datetime
 
-# —— 偏离"招牌形式"的粗标记(通用:商单 / vlog / 访谈 / 直播 / 音乐)——
-OFF_MARKERS = {
-    "商单": ["×", "合作", "赞助", "广告", "推广", "联名"],
-    "vlog": ["vlog"],
-    "直播": ["直播回放", "录播", "直播录"],
-    "访谈": ["专访", "对谈", "采访", "对话"],
-    "音乐": ["翻唱", "弹唱", "音乐区"],
-    # 英文(给 YouTube 等英文标题用;只用多字符安全词,绝不误伤中文标题)
-    "EN": ["sponsored", "#ad", "(ad)", "[ad]", "paid promotion",
-           "podcast", "q&a", "interview", "livestream", "live stream"],
-}
+# 偏离"招牌形式"的关键词 —— 单一数据源在 shared_markers.py(features 用全口径版)。
+from shared_markers import OFF_MARKERS_FULL as OFF_MARKERS
 # 标题里的"夸张/钩子"词(通用 clickbait 信号)
 SUPERLATIVE = ["最", "史上", "第一", "唯一", "居然", "竟然", "震惊", "千万",
                "全网", "没人", "真相", "终于", "99%", "100%", "绝了", "炸裂", "崩溃"]

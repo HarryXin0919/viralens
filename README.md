@@ -239,7 +239,7 @@ creators.py ──▶ fetch_multi.py ──▶ data/<alias>_videos.json        (
 - **Signal scanner** (`scan_signals`): turns each video into a universal feature vector, then auto-tests
   every dimension (title patterns, length buckets, daypart, cover metrics…) for high/low-play separation,
   ranks by effect size, and reports which levers are *universal* vs *creator-specific*.
-- **L2 — text** (`subtitle`, `comments`): subtitles + hot comments → `jieba` keyword analysis.
+- **L2 — text**: subtitles + hot comments → `jieba` keyword analysis (cross-creator comment-engagement test: `compare_meme.py`).
 - **Cross-creator / cross-zone gate**: a pattern earns a ✅ only if it survives the *same test* on
   multiple independent creators **and** more than one zone.
 
