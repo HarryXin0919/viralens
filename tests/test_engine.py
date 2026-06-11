@@ -81,9 +81,12 @@ class _FakeUser:
         self.total = total
 
     async def get_videos(self, ps, pn):
-        already = (pn - 1) * fb.PAGE_MAX
-        n = max(0, min(ps, self.total - already))
-        vlist = [{"bvid": f"BV{pn}_{i}", "title": f"v{i}", "play": i, "created": 0} for i in range(n)]
+        # 忠实模拟 B 站窗口语义:offset 由**本次请求的 ps** 决定([(pn-1)*ps, pn*ps)),
+        # 不是常量 PAGE_MAX —— 之前用 PAGE_MAX 算,恰好掩盖了"末页改小 ps 导致窗口错位"的 bug
+        start = (pn - 1) * ps
+        n = max(0, min(ps, self.total - start))
+        vlist = [{"bvid": f"BV{start + i}", "title": f"v{start + i}", "play": i, "created": 0}
+                 for i in range(n)]
         return {"list": {"vlist": vlist}, "page": {"count": self.total}}
 
 
@@ -92,6 +95,7 @@ def test_fetch_creator_paginates_beyond_one_page(monkeypatch):
     monkeypatch.setattr(fb.user, "User", lambda uid, credential=None: _FakeUser(120))
     vids = asyncio.run(fb.fetch_creator({"name": "N", "alias": "a", "zone": "z", "uid": 1}, "sess", num=120))
     assert len(vids) == 120
+    assert len({v["vid"] for v in vids}) == 120   # 分页窗口不重叠:120 条各不相同、无重复无遗漏
 
 
 def test_fetch_creator_stops_when_no_more(monkeypatch):

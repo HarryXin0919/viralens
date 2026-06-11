@@ -17,7 +17,6 @@ viralens · viralens.py —— 一个入口,两种模式。
 """
 import subprocess
 import sys
-from pathlib import Path
 
 import runtime                        # 收口「源码跑 vs 打包成 app 跑」的路径/子进程差异
 

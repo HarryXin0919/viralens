@@ -25,6 +25,7 @@ from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
 import runtime                        # 收口「源码跑 vs 打包成 app 跑」的路径/子进程差异
+from schema import video_url          # 单一数据源:链接拼法只在 schema.py 维护
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -105,17 +106,6 @@ def data_stats():
         except Exception:
             pass
     return len(files), count
-
-
-def video_url(v):
-    """按平台拼出可点开的视频链接(给结果卡片用)。"""
-    p = (v.get("platform") or "bilibili").lower()
-    vid = v.get("bvid") or v.get("vid") or ""
-    if not vid:
-        return ""
-    if p == "youtube":
-        return f"https://www.youtube.com/watch?v={vid}"
-    return f"https://www.bilibili.com/video/{vid}"
 
 
 # ——————————————————————— 诊断页:选择器数据 + 单视频诊断 ———————————————————————

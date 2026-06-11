@@ -15,7 +15,6 @@ import asyncio
 import json
 import os
 import sys
-from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -79,8 +78,10 @@ async def main():
             continue
         out.write_text(json.dumps(videos, ensure_ascii=False, indent=2), encoding="utf-8")
         n_ok += 1
-        hi, lo = videos[0], videos[-1]
-        span = f"{(videos[-1].get('created_iso') or '?')[:10]} ~ {(videos[0].get('created_iso') or '?')[:10]}"
+        hi, lo = videos[0], videos[-1]               # 适配器按播放降序返回:hi=最高播放,lo=最低
+        # 时间跨度要按日期算,不能拿播放排序的首尾凑(那是"最低播放的日期 ~ 最高播放的日期")
+        isos = sorted(i for i in (v.get("created_iso") for v in videos) if i)
+        span = f"{isos[0][:10]} ~ {isos[-1][:10]}" if isos else "?"
         print(f"  ✓ {c['name']:<16} [{platform}] {len(videos):>2}个  "
               f"播放 {lo['play'] or 0:>10,} ~ {hi['play'] or 0:>11,}  时间 {span}")
         if platform == "bilibili":

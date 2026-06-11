@@ -15,6 +15,7 @@ import json
 import sys
 import time
 from runtime import DATA, REPORTS, IMG
+from schema import fmt_play, video_url    # 单一数据源:链接拼法/播放量格式只在 schema.py 维护
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -36,19 +37,6 @@ def esc(s):
     return html.escape(str(s if s is not None else ""))
 
 
-def fmt_play(n):
-    """中文友好的播放量:1.2亿 / 814万 / 9532。"""
-    try:
-        n = float(n)
-    except (TypeError, ValueError):
-        return "-"
-    if n >= 1e8:
-        return f"{n/1e8:.2f}亿"
-    if n >= 1e4:
-        return f"{n/1e4:.1f}万"
-    return f"{n:,.0f}"
-
-
 def fmt_dur(sec):
     try:
         sec = int(sec)
@@ -56,16 +44,6 @@ def fmt_dur(sec):
         return "-"
     m, s = divmod(sec, 60)
     return f"{m}:{s:02d}"
-
-
-def video_url(v):
-    plat = (v.get("platform") or "bilibili").lower()
-    vid = v.get("bvid") or v.get("vid") or ""
-    if not vid:
-        return ""
-    if plat == "youtube":
-        return f"https://www.youtube.com/watch?v={vid}"
-    return f"https://www.bilibili.com/video/{vid}"
 
 
 def img_data_uri(path):

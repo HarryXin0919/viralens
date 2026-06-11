@@ -13,27 +13,16 @@ viralens · export_data.py
 import csv
 import json
 import sys
-from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 from runtime import DATA           # 源码=仓库/data,打包成 app 时=用户数据目录
+from schema import video_url       # 单一数据源:链接拼法只在 schema.py 维护
 
 # CSV 里放哪些列、按什么顺序(挑人看得懂、Excel 排序有用的;长描述留在 JSON 里不塞 CSV)
 CSV_COLS = ["creator", "platform", "zone", "title", "play", "comment", "like",
             "danmaku", "duration_sec", "length", "published", "url", "cover_url"]
-
-
-def video_url(v):
-    """按平台拼出可点开的视频链接。"""
-    p = (v.get("platform") or "bilibili").lower()
-    vid = v.get("bvid") or v.get("vid") or ""
-    if not vid:
-        return ""
-    if p == "youtube":
-        return f"https://www.youtube.com/watch?v={vid}"
-    return f"https://www.bilibili.com/video/{vid}"
 
 
 def hhmmss(sec):

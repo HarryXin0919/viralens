@@ -24,10 +24,11 @@ HOWTO = ["教程", "教学", "攻略", "方法", "手把手", "如何", "技巧"
          "测评", "评测", "实测", "上手", "教你"]                          # 教程/实用
 
 
-def off_tag(title, desc=""):
-    """命中任一偏离标记就返回标签,否则空串。宁紧勿松,靠人眼复核标题。"""
+def off_tag(title, desc="", markers=OFF_MARKERS):
+    """命中任一偏离标记就返回标签,否则空串。宁紧勿松,靠人眼复核标题。
+    markers 可换口径(compare_form.py 传保守版 OFF_MARKERS_COMPARE,匹配循环只写这一处)。"""
     s = (title + " " + desc).lower()
-    for label, ms in OFF_MARKERS.items():
+    for label, ms in markers.items():
         if any(m.lower() in s for m in ms):
             return label
     return ""

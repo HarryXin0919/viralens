@@ -8,7 +8,6 @@ viralens · compare_form.py
 """
 import json
 import sys
-from pathlib import Path
 from statistics import median
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -16,6 +15,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 from runtime import DATA           # 源码=仓库/data,打包成 app 时=用户数据目录
 from creators import CREATORS
+import features
 
 # 偏离核心形式的关键词 —— 单一数据源在 shared_markers.py(对比报告用保守口径版)。
 from shared_markers import OFF_MARKERS_COMPARE as OFF_MARKERS
@@ -24,14 +24,9 @@ from shared_markers import OFF_MARKERS_COMPARE as OFF_MARKERS
 def off_tag(v):
     # YouTube description 几乎必含 brand list / hashtag(podcast/interview 等),全军 false positive;
     # 只扫 title。B 站 description 短而精,继续扫 title + description。
-    if (v.get("platform") or "bilibili") == "youtube":
-        s = (v.get("title", "") or "").lower()
-    else:
-        s = (v.get("title", "") + " " + v.get("description", "")).lower()
-    for label, ms in OFF_MARKERS.items():
-        if any(m.lower() in s for m in ms):
-            return label
-    return ""
+    # 匹配循环本身复用 features.off_tag,只是换成保守口径的标记表。
+    desc = "" if (v.get("platform") or "bilibili") == "youtube" else (v.get("description") or "")
+    return features.off_tag(v.get("title") or "", desc, OFF_MARKERS)
 
 
 def fmt(n):
@@ -46,32 +41,40 @@ def main():
             print(f"  ✗ 缺 {p.name}")
             continue
         vids = json.loads(p.read_text(encoding="utf-8"))
+        if not vids:
+            print(f"  ✗ {p.name} 是空的,跳过")
+            continue
         for v in vids:
             v["off"] = off_tag(v)
-        vids.sort(key=lambda x: -(x["play"] or 0))
+        # 导入的数据可能缺 play/title 字段或为 null —— 全部走 .get + 兜底,别在分析里崩
+        vids.sort(key=lambda x: -(x.get("play") or 0))
         top5, bot5 = vids[:5], vids[-5:]
-        top5_med = median([v["play"] for v in top5])
-        bot5_med = median([v["play"] for v in bot5])
-        ratio = top5_med / bot5_med if bot5_med else float("inf")
+        top5_med = median([v.get("play") or 0 for v in top5])
+        bot5_med = median([v.get("play") or 0 for v in bot5])
+        if not bot5_med:
+            # 尾部播放全是 0/缺失:头尾倍数没意义,而且 Infinity 进不了 JSON
+            print(f"  ✗ {c['name']} 尾部播放全是 0/缺失,头尾对比无意义,跳过")
+            continue
+        ratio = top5_med / bot5_med
 
         print("\n" + "=" * 74)
         print(f"■ {c['name']}   top5中位 {fmt(top5_med)} / bot5中位 {fmt(bot5_med)}  = {ratio:.0f}×")
         print("  🔴 TOP5(爆款):")
         for v in top5:
             tag = f"[{v['off']}]" if v["off"] else ""
-            print(f"     {fmt(v['play']):>12}  {tag}{v['title'][:34]}")
+            print(f"     {fmt(v.get('play')):>12}  {tag}{(v.get('title') or '')[:34]}")
         print("  🔵 BOTTOM5(翻车):")
         for v in bot5:
             tag = f"[{v['off']}]" if v["off"] else ""
-            print(f"     {fmt(v['play']):>12}  {tag}{v['title'][:34]}")
+            print(f"     {fmt(v.get('play')):>12}  {tag}{(v.get('title') or '')[:34]}")
 
         rows.append({
             "creator": c["name"],
             "top5_med": top5_med, "bot5_med": bot5_med, "ratio": round(ratio, 1),
             "off_in_top5": sum(1 for v in top5 if v["off"]),
             "off_in_bot5": sum(1 for v in bot5 if v["off"]),
-            "top5": [{"play": v["play"], "off": v["off"], "title": v["title"]} for v in top5],
-            "bot5": [{"play": v["play"], "off": v["off"], "title": v["title"]} for v in bot5],
+            "top5": [{"play": v.get("play"), "off": v["off"], "title": v.get("title") or ""} for v in top5],
+            "bot5": [{"play": v.get("play"), "off": v["off"], "title": v.get("title") or ""} for v in bot5],
         })
 
     (DATA / "cross_creator_form.json").write_text(

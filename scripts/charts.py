@@ -8,7 +8,6 @@ viralens · charts.py
 """
 import json
 import sys
-from pathlib import Path
 
 import matplotlib
 matplotlib.use("Agg")
@@ -18,6 +17,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 from creators import CREATORS
+from schema import fmt_play     # 播放量格式化收口在 schema.py;轴标签传 yi=1, wan=0 用短格式
 
 # 中文字体:按 Windows → macOS → Linux 顺序取第一个装了的,都没有才显示 □□□
 plt.rcParams["font.sans-serif"] = [
@@ -58,16 +58,11 @@ def anon(name):
     return ANON.get(name, "创作者")
 
 
-def fmt_play(n):
-    if n >= 1e8:
-        return f"{n/1e8:.1f}亿"
-    if n >= 1e4:
-        return f"{n/1e4:.0f}万"
-    return f"{n:,.0f}"
-
-
 def chart_form_spread():
     rows = json.loads((DATA / "cross_creator_form.json").read_text(encoding="utf-8"))
+    if not rows:
+        print("  ⏭ cross_creator_form.json 是空的(还没有创作者数据)—— 跳过这张图")
+        return
     rows.sort(key=lambda r: r["top5_med"])   # 从下往上递增,天花板最高的在顶部
     zone_of = {c["name"]: c.get("zone", "?") for c in CREATORS}
 
@@ -79,7 +74,7 @@ def chart_form_spread():
         ax.scatter(hi, i, color=HIT, s=110, zorder=3, edgecolors="white", linewidths=1.2)
         ax.text(hi * 1.3, i, f"{r['ratio']:.0f}×" if r["ratio"] >= 10 else f"{r['ratio']:.1f}×",
                 va="center", ha="left", fontsize=11, color="#333", fontweight="bold")
-        ax.text(lo * 0.72, i, fmt_play(lo), va="center", ha="right", fontsize=8.5, color="#888")
+        ax.text(lo * 0.72, i, fmt_play(lo, yi=1, wan=0), va="center", ha="right", fontsize=8.5, color="#888")
 
     ax.set_xscale("log")
     ax.set_yticks(range(len(rows)))
@@ -225,10 +220,22 @@ def chart_2nd_person_falsified():
 
 
 def main():
-    chart_form_spread()
-    chart_2nd_person_falsified()
-    chart_meme_falsified()
-    print("\n✅ 图已生成到 reports/img/")
+    # 三张图各自独立:缺哪个输入就跳过哪张,别让一张图(尤其是依赖可选步骤的)拖垮整个 charts 步骤
+    jobs = [
+        (chart_form_spread, "cross_creator_form.json(compare_form.py 生成)"),
+        (chart_2nd_person_falsified, "signal_scan.json(scan_signals.py 生成)"),
+        (chart_meme_falsified, "cross_creator_meme.json(可选步骤 compare_meme.py 才会生成)"),
+    ]
+    n_ok = 0
+    for fn, src in jobs:
+        try:
+            fn()
+            n_ok += 1
+        except FileNotFoundError:
+            print(f"  ⏭ 缺 {src} —— 跳过这张图")
+        except Exception as e:
+            print(f"  ⚠ 这张图没画成({type(e).__name__}: {e})—— 跳过")
+    print(f"\n✅ {n_ok} 张图已生成到 reports/img/")
 
 
 if __name__ == "__main__":

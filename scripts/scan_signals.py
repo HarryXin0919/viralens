@@ -16,7 +16,6 @@ import json
 import sys
 import math
 import time
-from pathlib import Path
 from statistics import median
 
 if hasattr(sys.stdout, "reconfigure"):

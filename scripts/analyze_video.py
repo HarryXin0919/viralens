@@ -66,14 +66,6 @@ def _safe(s):
     return re.sub(r"[^0-9A-Za-z_.-]", "_", str(s))[:80]
 
 
-def _url(v):
-    plat = (v.get("platform") or "").lower()
-    if plat == "youtube":
-        return f"https://www.youtube.com/watch?v={v.get('vid')}"
-    bv = v.get("bvid") or v.get("vid")
-    return f"https://www.bilibili.com/video/{bv}"
-
-
 # ————————————————————————— 下载(yt-dlp,只下开头) —————————————————————————
 def _sessdata():
     """B 站 cookie。只在内存里用,绝不打印/落盘到 git。"""

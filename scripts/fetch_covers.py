@@ -22,7 +22,6 @@ import sys
 import io
 import time
 import urllib.request
-from pathlib import Path
 
 import numpy as np
 from PIL import Image

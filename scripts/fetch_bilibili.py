@@ -80,10 +80,12 @@ async def fetch_creator(c, sessdata, num=40, tries=4) -> "list[VideoRecord]":
     cred = Credential(sessdata=sessdata)
     u = user.User(uid=uid, credential=cred)
 
-    raw_videos = []
+    raw_videos: list[dict] = []
     pn = 1
+    # 页大小定死:B 站按 [(pn-1)*ps, pn*ps) 取窗口,最后一页改小 ps 会让窗口错位
+    # (重复抓前面的 + 漏掉后面的)。宁可末页多拿几条,最后统一切片到 num。
+    ps = min(PAGE_MAX, num)
     while len(raw_videos) < num:
-        ps = min(PAGE_MAX, num - len(raw_videos))
         raw = await _get_page(u, ps, pn, c["name"], tries)
         page = (raw.get("list", {}) or {}).get("vlist", []) or []
         raw_videos.extend(page)

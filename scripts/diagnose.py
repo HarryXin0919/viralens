@@ -18,7 +18,8 @@ viralens · diagnose.py —— 单条视频的「个性化诊断大脑」。
 import json
 import re
 import sys
-from pathlib import Path
+from statistics import median
+from typing import Any
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -26,7 +27,7 @@ if hasattr(sys.stdout, "reconfigure"):
 from runtime import DATA           # 源码=仓库/data,打包成 app 时=用户数据目录
 
 # —— 懒加载 + 缓存:同一进程里只读一次盘 ——
-_CACHE = {}
+_CACHE: dict[str, Any] = {}
 
 
 def _load(name):
@@ -100,12 +101,9 @@ def _subtitle_of(vid):
 
 # ————————————————————————— 小工具 —————————————————————————
 def _median(xs):
-    xs = sorted(x for x in xs if x is not None)
-    n = len(xs)
-    if not n:
-        return None
-    m = n // 2
-    return xs[m] if n % 2 else (xs[m - 1] + xs[m]) / 2
+    """statistics.median + 本项目约定:先滤掉 None,空列表返回 None 而不是抛异常。"""
+    xs = [x for x in xs if x is not None]
+    return median(xs) if xs else None
 
 
 def zh_num(n):
@@ -246,13 +244,8 @@ def dim_title(alias, v):
     hit_len = _median([len(h.get("title") or "") for h in vids[:n_hit]]) or tlen
 
     metrics, levels = [], []
-    # 长度:跟自己爆款比
-    if hit_len and (0.7 * hit_len <= tlen <= 1.4 * hit_len):
-        lvl = "good"
-    elif hit_len and tlen > 1.4 * hit_len:
-        lvl = "ok"
-    else:
-        lvl = "ok"
+    # 长度:跟自己爆款比 —— 在爆款长度 0.7~1.4 倍区间内算 good,出区间只是 ok(不警告)
+    lvl = "good" if hit_len and 0.7 * hit_len <= tlen <= 1.4 * hit_len else "ok"
     levels.append(lvl)
     metrics.append({"name": {"zh": "长度", "en": "Length"},
                     "value": f"{tlen}", "ref": {"zh": f"你爆款约 {hit_len:.0f} 字", "en": f"your hits ~{hit_len:.0f} chars"},
@@ -418,14 +411,15 @@ def diagnose_video(alias, vid):
         dims.append(sub)
     dims = [d for d in dims if d]
 
-    # 私有后台数据(用户上传 CSV 后才有):完播率 / 点击率 —— 有就插进来一起算
+    # 私有后台数据(用户上传 CSV 后才有):完播率 / 点击率 —— 有就插进来一起算。
+    # 失败不挡公开维度,但要在控制台留痕:别让用户刚上传的 CSV 无声消失。
     try:
         import import_private
         priv = import_private.load_private(alias).get(v.get("vid") or v.get("bvid"))
         if priv:
             dims += import_private.private_dims(v, priv.get("metrics", {}))
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"  ⚠ 私有数据维度没加上(alias={alias}):{type(e).__name__}: {e}", file=sys.stderr)
 
     real = [d for d in dims if d["level"] in ("good", "ok", "warn")]
     n_good = sum(1 for d in real if d["level"] == "good")
