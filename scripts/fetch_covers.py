@@ -30,7 +30,7 @@ from PIL import Image
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-from runtime import DATA           # 源码=仓库/data,打包成 app 时=用户数据目录
+from runtime import DATA, atomic_write_text   # 源码=仓库/data,打包成 app 时=用户数据目录
 from creators import CREATORS
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
@@ -91,7 +91,10 @@ def main():
             print(f"  ✗ 缺 {c['alias']}_videos.json"); continue
         vids = json.loads(vp.read_text(encoding="utf-8"))
         cp = DATA / f"{c['alias']}_covers.json"
-        cache = json.loads(cp.read_text(encoding="utf-8")) if cp.exists() else {}
+        try:
+            cache = json.loads(cp.read_text(encoding="utf-8")) if cp.exists() else {}
+        except Exception:
+            cache = {}   # 上次写了一半损坏了:当没缓存重建,别让整轮崩在读取上
 
         jobs = [(v.get("bvid"), v.get("cover_url")) for v in vids
                 if v.get("bvid") and v.get("cover_url") and v.get("bvid") not in cache]
@@ -116,8 +119,8 @@ def main():
                     cache[bvid] = m
                     n_new += 1
                     if n_new % 10 == 0:                    # 边下边存,中断不丢
-                        cp.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
-        cp.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
+                        atomic_write_text(cp, json.dumps(cache, ensure_ascii=False, indent=2))
+        atomic_write_text(cp, json.dumps(cache, ensure_ascii=False, indent=2))
         print(f"  ✓ {c['name']}: 封面 {len(cache)}/{len(vids)} (新增 {n_new}, 失败 {n_fail})")
 
     print("\n✅ 封面指标已缓存,可重跑 scan_signals.py 看封面与播放的相关性")

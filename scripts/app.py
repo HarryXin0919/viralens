@@ -214,8 +214,23 @@ def slug(s):
     return s or "imported"
 
 
+def _inside(child: Path, base: Path) -> bool:
+    """child 解析后是否落在 base 之内(解析符号链接,防越权读盘外文件)。"""
+    try:
+        c, b = child.resolve(), base.resolve()
+    except Exception:
+        return False
+    try:
+        return c.is_relative_to(b)            # Py3.9+
+    except AttributeError:
+        return c == b or b in c.parents       # 老 Python 兜底
+
+
 def do_import(path):
     p = Path(path.strip().strip('"').strip("'"))
+    # 只允许导入 DATA 目录内的文件:防攻击者借 /api/import 读任意 .json 再经 /api/data 外泄
+    if not _inside(p, DATA):
+        return {"ok": False, "error": "只能导入数据目录内的文件"}
     if not p.exists():
         return {"ok": False, "error": f"找不到文件:{p}"}
     if p.suffix.lower() != ".json":
@@ -243,6 +258,21 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass  # 安静,别刷屏
 
+    def _local_ok(self):
+        """防 DNS rebinding:只认本机 Host(精确到端口);POST 再校验 Origin 必须是 loopback。
+        远程网页拿到的 Host 是攻击者域名,据此拒掉,远程 JS 就驱动不了本地 API。"""
+        port = self.server.server_address[1]
+        host = (self.headers.get("Host") or "").strip()
+        if host not in (f"127.0.0.1:{port}", f"localhost:{port}"):
+            return False
+        if self.command == "POST":
+            origin = (self.headers.get("Origin") or "").strip()
+            if origin:
+                netloc = urlparse(origin).hostname
+                if netloc not in ("127.0.0.1", "localhost"):
+                    return False
+        return True
+
     def _json(self, code, obj):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
         self.send_response(code)
@@ -263,6 +293,8 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_GET(self):
+        if not self._local_ok():
+            return self._json(403, {"error": "forbidden"})
         path = urlparse(self.path).path
         if path in ("/", "/index.html"):
             if not GUI.exists():
@@ -337,12 +369,15 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/report" or path.startswith("/report/"):
             rel = path[len("/report"):].lstrip("/") or "index.html"
             target = (REPORTS / rel).resolve()
-            if not str(target).startswith(str(REPORTS.resolve())) or not target.exists():
+            # 真·目录包含(resolve 已归一化 ..);startswith 会被 reports_x 这类兄弟目录绕过
+            if not _inside(target, REPORTS) or not target.exists():
                 return self._json(404, {"error": "还没有报告 —— 先点『抓取并分析』生成"})
             return self._file(target)
         return self._json(404, {"error": "not found"})
 
     def do_POST(self):
+        if not self._local_ok():
+            return self._json(403, {"error": "forbidden"})
         path = urlparse(self.path).path
         length = int(self.headers.get("Content-Length", 0) or 0)
         raw = self.rfile.read(length) if length else b""

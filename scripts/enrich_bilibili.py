@@ -21,7 +21,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 from bilibili_api import video, Credential
 
-from runtime import DATA
+from runtime import DATA, atomic_write_text
 from creators import CREATORS
 
 try:
@@ -94,8 +94,8 @@ async def main():
                 await asyncio.sleep(PACE)
             n_ok += await enrich_one(v, cred)
             if n_ok and n_ok % 10 == 0:                  # 边取边存,中断不丢
-                p.write_text(json.dumps(vids, ensure_ascii=False, indent=2), encoding="utf-8")
-        p.write_text(json.dumps(vids, ensure_ascii=False, indent=2), encoding="utf-8")
+                atomic_write_text(p, json.dumps(vids, ensure_ascii=False, indent=2))
+        atomic_write_text(p, json.dumps(vids, ensure_ascii=False, indent=2))
         print(f"  ✓ {c['name']:<16} 三连补全 {n_ok}/{len(todo)} 条")
 
     print("\n✅ 完成。重跑 scan_signals.py / 报告,会自动出现「三连率 / 投币率」维度")

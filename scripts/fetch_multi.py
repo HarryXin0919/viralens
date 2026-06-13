@@ -26,7 +26,7 @@ from concurrent.futures import ThreadPoolExecutor
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-from runtime import DATA           # 可写数据目录(源码=仓库/data,app=用户目录;runtime 已自动建好)
+from runtime import DATA, atomic_write_text   # 可写数据目录(源码=仓库/data,app=用户目录;runtime 已自动建好)
 
 try:
     from config_local import SESSDATA
@@ -65,7 +65,7 @@ def _save_result(c, platform, videos):
         print(f"  ✗ {c['name']} [{platform}]: 没抓到视频")
         return False
     out = DATA / f"{c['alias']}_videos.json"
-    out.write_text(json.dumps(videos, ensure_ascii=False, indent=2), encoding="utf-8")
+    atomic_write_text(out, json.dumps(videos, ensure_ascii=False, indent=2))
     hi, lo = videos[0], videos[-1]               # 适配器按播放降序返回:hi=最高播放,lo=最低
     # 时间跨度要按日期算,不能拿播放排序的首尾凑(那是"最低播放的日期 ~ 最高播放的日期")
     isos = sorted(i for i in (v.get("created_iso") for v in videos) if i)
@@ -111,10 +111,10 @@ async def main():
                 await asyncio.sleep(2.0)
             try:
                 videos = await fetch_for(c)
+                n_ok += _save_result(c, "bilibili", videos)   # 写入也包进 try:一人写失败不拖垮已抓到的别人
             except Exception as e:
                 print(f"  ✗ {c['name']} [bilibili]: {type(e).__name__}: {e}")
                 continue
-            n_ok += _save_result(c, "bilibili", videos)
 
     async def run_others_parallel():
         """YouTube(及未来的无风控平台):线程池并发;按清单顺序收割,输出顺序稳定。"""
@@ -134,13 +134,13 @@ async def main():
             for (c, platform), t in zip(others, tasks):
                 try:
                     videos = await t
+                    n_ok += _save_result(c, platform, videos)   # 写入也包进 try:一人写失败不拖垮已抓到的别人
                 except Exception as e:
                     print(f"  ✗ {c['name']} [{platform}]: {type(e).__name__}: {e}")
                     continue
-                n_ok += _save_result(c, platform, videos)
 
     # 两条线同时跑:B 站在等风控间隔时,YouTube 在并行抓
-    await asyncio.gather(run_bili_serial(), run_others_parallel())
+    await asyncio.gather(run_bili_serial(), run_others_parallel(), return_exceptions=True)
     print(f"\n✅ 完成,{n_ok} 个创作者已写 data/<alias>_videos.json")
 
 

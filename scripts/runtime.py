@@ -79,6 +79,16 @@ def bootstrap() -> None:
     _BOOTSTRAPPED = True
 
 
+def atomic_write_text(path, text: str, encoding: str = "utf-8") -> None:
+    """原子写文本:先写同目录临时文件,再 os.replace 覆盖目标。
+    中断(断电/Ctrl+C)时目标文件要么是旧内容、要么是新内容,绝不会是写了一半的残缺数据。
+    用于不可再生的主数据(<alias>_videos.json / 封面缓存等)。"""
+    path = Path(path)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text, encoding=encoding)
+    os.replace(tmp, path)
+
+
 def worker_cmd(script: str, args=None):
     """拼出「用本工具自己的解释器跑某个子脚本」的命令行。
       源码模式: [python, scripts/<script>, *args]            (和历史行为一致)

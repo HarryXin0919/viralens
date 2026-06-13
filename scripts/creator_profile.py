@@ -43,6 +43,16 @@ def safe_div(a, b):
 
 def creator_stats(vids):
     """一位 UP 主的结构性画像(可跨人对比的量)。"""
+    if not vids:
+        # 空数据集:返回零化但键齐全的画像,别让 len(feats)/len(vids) 除零崩掉整条 --report
+        return {
+            "play_med": 0,
+            "in_format_rate": 0,
+            "dur_med": 0,
+            "gap_days": None,
+            "comment_per_10k": 0,
+            "danmaku_per_min": 0,
+        }
     feats = [extract(v, NOW) for v in vids]
     plays = [f["play"] for f in feats]
     durs = [f["duration_sec"] for f in feats if f["duration_sec"] > 0]

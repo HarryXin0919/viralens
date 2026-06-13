@@ -202,7 +202,7 @@ def section_table(videos):
             f'<td class="t">{title_html}</td>'
             f'<td data-v="{v.get("play") or 0}">{fmt_play(v.get("play"))}</td>'
             f'<td data-v="{v.get("comment") or 0}">{esc(v.get("comment"))}</td>'
-            f'<td data-v="{v.get("danmaku") or v.get("like") or 0}">{esc(v.get("danmaku") if v.get("danmaku") is not None else v.get("like"))}</td>'
+            f'<td data-v="{v.get("danmaku") or v.get("like") or 0}">{esc(v.get("danmaku") or v.get("like") or 0)}</td>'
             f'<td data-v="{v.get("duration_sec") or 0}">{fmt_dur(v.get("duration_sec"))}</td>'
             f'<td>{esc((v.get("created_iso") or "")[:10])}</td>'
             f'</tr>'
