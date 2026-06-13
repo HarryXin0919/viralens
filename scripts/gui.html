@@ -183,6 +183,21 @@
   .ptag.yt{color:var(--yt)} .ptag.yt .dot{background:var(--yt)}
   .zone-tag{font-size:12.5px;color:var(--muted);font-weight:600}
 
+  /* ——— KPI band(结果摘要,有数据才显示) ——— */
+  .kpis{display:none;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+  @media(max-width:640px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{position:relative;overflow:hidden;background:var(--bg);border:1px solid var(--line);
+    border-radius:13px;padding:13px 16px 12px;animation:kin .45s cubic-bezier(.2,.7,.3,1) both}
+  .kpi:nth-child(2){animation-delay:.06s}.kpi:nth-child(3){animation-delay:.12s}.kpi:nth-child(4){animation-delay:.18s}
+  @keyframes kin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .kpi .k-num{font-size:24px;font-weight:900;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.15}
+  .kpi .k-lab{font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.05em;margin-top:2px}
+  .kpi::after{content:"";position:absolute;inset:auto 0 0 0;height:2px;background:var(--grad);opacity:.55}
+
+  /* ——— creators 表的「数据」列 ——— */
+  .dcell{font-variant-numeric:tabular-nums;font-weight:600;font-size:12.5px;color:var(--ink);white-space:nowrap}
+  .dcell .ddate{color:var(--faint);font-weight:500}
+
   /* ——— toolbar ——— */
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 6px;align-items:center}
   .search{position:relative;flex:1;min-width:210px}
@@ -233,6 +248,8 @@
     box-shadow:0 16px 44px -16px rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:80vw}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .foot{text-align:center;color:var(--faint);font-size:12.5px;margin-top:8px}
+  .foot a{color:var(--brand-ink);font-weight:600}
+  .foot a:hover{text-decoration:underline}
 
   @media (max-width:560px){
     .hero h1{font-size:38px} .hero-inner{padding:46px 22px 40px}
@@ -318,7 +335,7 @@
       <div class="card-head"><span class="sec-badge">2</span><h2 data-i18n="creatorsTitle"></h2><span id="ccount" class="sec-sub"></span></div>
       <div class="desc" data-i18n="creatorsDesc"></div>
       <div class="scroll"><table id="ctable">
-        <thead><tr><th data-i18n="thName"></th><th data-i18n="thPlat"></th><th data-i18n="thZone"></th></tr></thead>
+        <thead><tr><th data-i18n="thName"></th><th data-i18n="thPlat"></th><th data-i18n="thZone"></th><th data-i18n="thData"></th></tr></thead>
         <tbody></tbody></table></div>
     </div>
 
@@ -354,9 +371,11 @@
         <span class="sec-badge">4</span><h2 data-i18n="resultsTitle"></h2><span id="dcount" class="sec-sub"></span>
         <div class="head-actions">
           <button class="btn btn-invert" onclick="openReport()" data-i18n="openReport"></button>
+          <button class="btn btn-ghost" onclick="openDiag()" data-i18n="openDiag"></button>
           <button class="btn btn-ghost" onclick="loadData()" data-i18n="refresh"></button>
         </div>
       </div>
+      <div class="kpis" id="kpis"></div>
       <div class="toolbar">
         <div class="search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -366,6 +385,9 @@
           <option value="play" data-i18n="sortPlay"></option>
           <option value="date" data-i18n="sortDate"></option>
           <option value="comment" data-i18n="sortComment"></option>
+          <option value="like" data-i18n="sortLike"></option>
+          <option value="danmaku" data-i18n="sortDanmaku"></option>
+          <option value="duration_sec" data-i18n="sortDur"></option>
         </select>
         <select class="sel" id="vplat" onchange="resetPage();renderGrid()">
           <option value="all" data-i18n="platAll"></option>
@@ -409,18 +431,21 @@ const I18N = {
       "<li><b>API 和服务 → 凭据</b> → 顶部 <b>+ 创建凭据 → API 密钥</b></li>"+
       "<li>复制弹出的密钥 → 粘到上面 → 点「保存密钥」(免费额度每天够用)</li>",
     creatorsTitle:"创作者清单", creatorsDesc:"v1 在 scripts/creators.py 里增删(一行一个);可视化编辑下一版做。",
-    thName:"名字", thPlat:"平台", thZone:"分区",
+    thName:"名字", thPlat:"平台", thZone:"分区", thData:"数据",
+    notFetched:"未抓取", cData:(n,d)=>`${n} 条 · <span class="ddate">${d}</span>`,
     fetchTitle:"抓取",
     fetchDesc:"「抓取数据」只取干净的 CSV / JSON;「抓取并分析」再跑完整分析、出交互报告。只会抓你上面勾选的平台。",
     optNoFetch:"用已有数据,不重新抓取", optForce:"强制重抓(忽略缓存)",
     btnData:"抓取数据", btnReport:"抓取并分析", running:"运行中…",
-    resultsTitle:"结果", openReport:"打开完整报告", refresh:"刷新数据",
-    searchPh:"搜标题 / 创作者…", sortPlay:"按播放", sortDate:"按最新", sortComment:"按评论", platAll:"全部平台",
+    resultsTitle:"结果", openReport:"打开完整报告", openDiag:"单视频诊断", refresh:"刷新数据",
+    kpiVideos:"视频", kpiCreators:"创作者", kpiMed:"播放中位", kpiMax:"最高播放",
+    searchPh:"搜标题 / 创作者…", sortPlay:"按播放", sortDate:"按最新", sortComment:"按评论",
+    sortLike:"按点赞", sortDanmaku:"按弹幕", sortDur:"按时长", platAll:"全部平台",
     emptyData:"还没有数据 —— 先抓取,或导入已有文件",
     importTitle:"导入已有数据",
     importDesc:"之前抓过的数据(all_videos.json 格式)贴上完整路径,导入后整理进来。再用上面「用已有数据」+「抓取并分析」即可分析。",
     importPh:"例:C:\\Users\\你\\Desktop\\old_videos.json", importBtn:"导入并整理",
-    footer:"viralens · 本地控制台 · 只监听 127.0.0.1",
+    footer:'viralens · 本地控制台 · 只监听 127.0.0.1 · <a href="https://github.com/HarryXin0919/viralens" target="_blank" rel="noopener">GitHub ↗</a>',
     set:"已设置 ✓", notset:"未设置",
     cTotal:n=>`共 ${n} 位`,
     vCount:(n,more)=>`· ${n} 条视频`+(more?`(只显示前 ${more})`:''),
@@ -454,18 +479,21 @@ const I18N = {
       "<li><b>APIs & Services → Credentials</b> → <b>+ Create credentials → API key</b></li>"+
       "<li>Copy the key → paste above → click “Save keys” (free daily quota is plenty)</li>",
     creatorsTitle:"Creators", creatorsDesc:"v1: add/remove in scripts/creators.py (one per line). Visual editing comes next.",
-    thName:"Name", thPlat:"Platform", thZone:"Zone",
+    thName:"Name", thPlat:"Platform", thZone:"Zone", thData:"Data",
+    notFetched:"not fetched", cData:(n,d)=>`${n} vids · <span class="ddate">${d}</span>`,
     fetchTitle:"Fetch",
     fetchDesc:"“Fetch data” pulls clean CSV / JSON only. “Fetch & Analyze” also runs the full analysis and builds the interactive report. Only the platforms you checked above are fetched.",
     optNoFetch:"Use existing data, don't re-fetch", optForce:"Force re-fetch (ignore cache)",
     btnData:"Fetch data", btnReport:"Fetch & Analyze", running:"Running…",
-    resultsTitle:"Results", openReport:"Open full report", refresh:"Refresh",
-    searchPh:"Search title / creator…", sortPlay:"By plays", sortDate:"Newest", sortComment:"By comments", platAll:"All platforms",
+    resultsTitle:"Results", openReport:"Open full report", openDiag:"Per-video check", refresh:"Refresh",
+    kpiVideos:"Videos", kpiCreators:"Creators", kpiMed:"Median plays", kpiMax:"Top plays",
+    searchPh:"Search title / creator…", sortPlay:"By plays", sortDate:"Newest", sortComment:"By comments",
+    sortLike:"By likes", sortDanmaku:"By danmaku", sortDur:"By length", platAll:"All platforms",
     emptyData:"No data yet — fetch first, or import a file",
     importTitle:"Import existing data",
     importDesc:"Have data from before (all_videos.json format)? Paste its full path to bring it in. Then use “Use existing data” + “Fetch & Analyze” above.",
     importPh:"e.g. C:\\Users\\you\\Desktop\\old_videos.json", importBtn:"Import",
-    footer:"viralens · local console · binds 127.0.0.1 only",
+    footer:'viralens · local console · binds 127.0.0.1 only · <a href="https://github.com/HarryXin0919/viralens" target="_blank" rel="noopener">GitHub ↗</a>',
     set:"set ✓", notset:"not set",
     cTotal:n=>`${n} total`,
     vCount:(n,more)=>`· ${n} videos`+(more?` (showing first ${more})`:''),
@@ -495,7 +523,7 @@ function applyLang(){
 function toggleLang(){
   lang = lang==='zh'?'en':'zh'; localStorage.setItem('lang',lang);
   document.body.classList.add('lswitch');
-  setTimeout(()=>{ applyLang(); renderStatus(); renderGrid();
+  setTimeout(()=>{ applyLang(); renderStatus(); renderKpis(); renderGrid();
     document.body.classList.remove('lswitch'); }, 200);
 }
 
@@ -568,7 +596,9 @@ function renderStatus(){
   const tb=document.querySelector('#ctable tbody');
   tb.innerHTML = (s.creators||[]).map(c=>{
     const yt=c.platform==='youtube';
-    return `<tr><td>${esc(c.name)}</td><td><span class="ptag ${yt?'yt':'bili'}"><span class="dot"></span>${yt?'YouTube':'Bilibili'}</span></td><td><span class="zone-tag">${esc(zoneLabel(c.zone))}</span></td></tr>`;
+    const data = c.count ? `<span class="dcell">${L().cData(c.count, esc(c.updated||''))}</span>`
+                         : `<span class="pill off" style="margin-left:0">${L().notFetched}</span>`;
+    return `<tr><td>${esc(c.name)}</td><td><span class="ptag ${yt?'yt':'bili'}"><span class="dot"></span>${yt?'YouTube':'Bilibili'}</span></td><td><span class="zone-tag">${esc(zoneLabel(c.zone))}</span></td><td>${data}</td></tr>`;
   }).join('');
   document.getElementById('ccount').textContent = L().cTotal((s.creators||[]).length);
 }
@@ -611,7 +641,16 @@ const PAGE=24; let pageN=1;
 function resetPage(){ pageN=1; }
 function moreGrid(){ pageN++; renderGrid(); }
 async function loadData(){ const d=await (await fetch('/api/data')).json();
-  STATE.videos=d.videos||[]; STATE.total=d.count||0; resetPage(); renderGrid(); }
+  STATE.videos=d.videos||[]; STATE.total=d.count||0; STATE.stats=d.stats||null;
+  resetPage(); renderKpis(); renderGrid(); }
+function renderKpis(){
+  const el=document.getElementById('kpis'), s=STATE.stats; if(!el) return;
+  if(!s || !s.videos){ el.style.display='none'; el.innerHTML=''; return; }
+  const items=[[s.videos.toLocaleString(),L().kpiVideos],[s.creators,L().kpiCreators],
+               [kfmt(s.play_med),L().kpiMed],[kfmt(s.play_max),L().kpiMax]];
+  el.innerHTML = items.map(([n,l])=>`<div class="kpi"><div class="k-num">${n}</div><div class="k-lab">${l}</div></div>`).join('');
+  el.style.display='grid';
+}
 function renderGrid(){
   const grid=document.getElementById('vgrid'); if(!grid) return;
   let vids=(STATE.videos||[]).slice();
@@ -650,7 +689,8 @@ function renderGrid(){
   else more.style.display='none';
 }
 
-function openReport(){ window.open('/diagnose','_blank'); }
+function openReport(){ window.open('/report','_blank'); }     /* 自包含 HTML 报告(跑过「抓取并分析」后生成) */
+function openDiag(){ window.open('/diagnose','_blank'); }      /* 单视频体检页(选一条视频逐维度诊断) */
 async function doImport(){
   const path=document.getElementById('imp').value.trim();
   if(!path){ toast(L().tNeedPath); return; }

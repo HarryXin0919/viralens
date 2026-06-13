@@ -21,8 +21,9 @@ from runtime import DATA           # 源码=仓库/data,打包成 app 时=用户
 from schema import video_url       # 单一数据源:链接拼法只在 schema.py 维护
 
 # CSV 里放哪些列、按什么顺序(挑人看得懂、Excel 排序有用的;长描述留在 JSON 里不塞 CSV)
+# coin/favorite 只有跑过 enrich_bilibili.py 的 B 站数据才有,其余行留空
 CSV_COLS = ["creator", "platform", "zone", "title", "play", "comment", "like",
-            "danmaku", "duration_sec", "length", "published", "url", "cover_url"]
+            "coin", "favorite", "danmaku", "duration_sec", "length", "published", "url", "cover_url"]
 
 
 def hhmmss(sec):
@@ -71,6 +72,8 @@ def main():
                 "play": v.get("play", "") if v.get("play") is not None else "",
                 "comment": v.get("comment", "") if v.get("comment") is not None else "",
                 "like": v.get("like", "") if v.get("like") is not None else "",
+                "coin": v.get("coin", "") if v.get("coin") is not None else "",
+                "favorite": v.get("favorite", "") if v.get("favorite") is not None else "",
                 "danmaku": v.get("danmaku", "") if v.get("danmaku") is not None else "",
                 "duration_sec": v.get("duration_sec", ""),
                 "length": hhmmss(v.get("duration_sec")),

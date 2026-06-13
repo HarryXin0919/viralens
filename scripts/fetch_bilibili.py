@@ -68,16 +68,17 @@ async def _get_page(u, ps, pn, name, tries):
             await asyncio.sleep(wait)
 
 
-async def fetch_creator(c, sessdata, num=40, tries=4) -> "list[VideoRecord]":
+async def fetch_creator(c, sessdata, num=40, tries=4, buvid3="") -> "list[VideoRecord]":
     """标准适配器接口(异步):给一个 creators.py 条目 → 标准视频表。
-    **分页**抓取直到取够 num 条或没有更多(B 站每页上限 50;旧版只取第一页,num>50 会漏数据)。"""
+    **分页**抓取直到取够 num 条或没有更多(B 站每页上限 50;旧版只取第一页,num>50 会漏数据)。
+    buvid3 可选:B 站 2025 年起部分接口要求该 Cookie,遇到 -352 时在 config_local.py 里补上。"""
     if not sessdata:
         raise BilibiliError("没读到 SESSDATA —— 在 config_local.py 里填上(浏览器 Cookie 里的 SESSDATA)")
     uid = c.get("uid")
     if not uid:
         raise BilibiliError(
             f"{c.get('name', '?')} 缺 uid —— 先跑 resolve_creators.py 查出 UP 主 ID 填进 creators.py")
-    cred = Credential(sessdata=sessdata)
+    cred = Credential(sessdata=sessdata, buvid3=buvid3) if buvid3 else Credential(sessdata=sessdata)
     u = user.User(uid=uid, credential=cred)
 
     raw_videos: list[dict] = []
@@ -86,6 +87,8 @@ async def fetch_creator(c, sessdata, num=40, tries=4) -> "list[VideoRecord]":
     # (重复抓前面的 + 漏掉后面的)。宁可末页多拿几条,最后统一切片到 num。
     ps = min(PAGE_MAX, num)
     while len(raw_videos) < num:
+        if pn > 1:
+            await asyncio.sleep(0.8)   # 成功路径也节流:把 412 防在前面,而不是事后退避救
         raw = await _get_page(u, ps, pn, c["name"], tries)
         page = (raw.get("list", {}) or {}).get("vlist", []) or []
         raw_videos.extend(page)

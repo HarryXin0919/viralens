@@ -13,6 +13,10 @@ viralens · viralens.py —— 一个入口,两种模式。
   --force       强制重抓(默认会跳过已抓过的创作者,保护已验证数据集)
   -h / --help   看这段说明
 
+可选增强步骤(单独跑,跑完重出报告自动生效):
+  python enrich_bilibili.py     B 站三连补全(赞/币/藏)→ 报告多出三连率/投币率维度
+  python fetch_covers.py        封面图像指标(亮度/色彩/繁简)→ 报告多出封面相关性
+
 跨平台:Windows / macOS / Linux 都能跑。python 找不到就换 py(Windows)或 python3。
 """
 import subprocess

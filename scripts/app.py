@@ -19,6 +19,7 @@ import socket
 import subprocess
 import sys
 import threading
+import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -68,11 +69,12 @@ def write_keys(sessdata, youtube):
     cur_sd, cur_yt = _read_config()
     sd = sessdata.strip() or cur_sd
     yt = youtube.strip() or cur_yt
-    proxy = ""                       # 保留用户可能手填的 PROXY(界面没这输入框,别冲掉)
+    proxy = buvid3 = ""              # 保留用户可能手填的 PROXY / BUVID3(界面没这输入框,别冲掉)
     try:
         import config_local as _c
         importlib.reload(_c)
         proxy = (getattr(_c, "PROXY", "") or "").strip()
+        buvid3 = (getattr(_c, "BUVID3", "") or "").strip()
     except Exception:
         pass
     body = (
@@ -82,16 +84,31 @@ def write_keys(sessdata, youtube):
     )
     if proxy:
         body += f"PROXY = {json.dumps(proxy, ensure_ascii=False)}\n"
+    if buvid3:
+        body += f"BUVID3 = {json.dumps(buvid3, ensure_ascii=False)}\n"
     CONFIG.write_text(body, encoding="utf-8")
 
 
 # ————————————————————————————— 状态 —————————————————————————————
 def list_creators():
+    """清单 + 每人的抓取状态(几条数据、什么时候抓的),界面据此显示「未抓取」提示。"""
     try:
         import creators
         importlib.reload(creators)
-        return [{"name": c["name"], "platform": c.get("platform", "bilibili"),
-                 "zone": c.get("zone", "")} for c in creators.CREATORS]
+        out = []
+        for c in creators.CREATORS:
+            alias = c.get("alias") or ""
+            count, updated = 0, ""
+            p = DATA / f"{alias}_videos.json"
+            if alias and p.exists():
+                try:
+                    count = len(json.loads(p.read_text(encoding="utf-8")))
+                    updated = time.strftime("%m-%d", time.localtime(p.stat().st_mtime))
+                except Exception:
+                    pass
+            out.append({"name": c["name"], "platform": c.get("platform", "bilibili"),
+                        "zone": c.get("zone", ""), "count": count, "updated": updated})
+        return out
     except Exception:
         return []
 
@@ -282,7 +299,14 @@ class Handler(BaseHTTPRequestHandler):
                              "cover_url": v.get("cover_url") or "",
                              "url": u,
                              "published": (v.get("created_iso") or "")[:10]})
-            return self._json(200, {"count": len(slim), "videos": slim[:300]})
+            # KPI 摘要按全量算(卡片只回前 300 条,但统计不能只看样本)
+            plays = sorted((v.get("play") or 0) for v in vids)
+            n = len(plays)
+            stats = {"videos": n,
+                     "creators": len({v.get("creator") for v in vids if v.get("creator")}),
+                     "play_med": (plays[n // 2] if n % 2 else (plays[n // 2 - 1] + plays[n // 2]) // 2) if n else 0,
+                     "play_max": plays[-1] if n else 0}
+            return self._json(200, {"count": len(slim), "videos": slim[:300], "stats": stats})
         if path in ("/diagnose", "/diagnose.html"):
             dg = HERE / "diagnose.html"
             if not dg.exists():

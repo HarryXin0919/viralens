@@ -24,3 +24,4 @@ config_local.py 已被 .gitignore 排除,不会上传到 GitHub。
 SESSDATA = ""          # Bilibili 登录 cookie(抓 B 站时用)
 YOUTUBE_API_KEY = ""   # YouTube Data API v3 key(抓 YouTube 时用)
 PROXY = ""             # 可选:下 YouTube 视频用的代理(国内填 http://127.0.0.1:10809)
+BUVID3 = ""            # 可选:B 站 Cookie 里的 buvid3。一般不用填;抓取报 -352 时再补

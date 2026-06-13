@@ -43,6 +43,7 @@ def extract(v, now):
     dur = v.get("duration_sec") or 0
     comment = v.get("comment") or 0
     danmaku = v.get("danmaku") or 0
+    like = v.get("like") or 0
     days = max((now - ts) / 86400, 1.0) if ts else 1.0
 
     f = {
@@ -51,6 +52,8 @@ def extract(v, now):
         "play_per_day": play / days,                       # 控累积:每天涨多少播放
         "comment_per_10k": comment / (play / 1e4) if play else 0,   # 互动率:每万播放多少评论
         "danmaku_per_min": danmaku / (dur / 60) if dur else 0,      # 弹幕密度:每分钟多少弹幕
+        "like_per_10k": like / (play / 1e4) if play else 0,         # 点赞率(YT 原生;B站跑过 enrich 后也有)
+        "danmaku_per_comment": danmaku / comment if comment else 0, # 陪伴型(弹幕多)vs 讨论型(评论多),B站特有指纹
         "days_since": days,
         # —— 数值型特征(算相关性) ——
         "duration_sec": dur,
@@ -80,6 +83,14 @@ def extract(v, now):
         f["daypart"] = ("夜 0-6" if dt.hour < 6 else "晨 6-12" if dt.hour < 12
                         else "午 12-18" if dt.hour < 18 else "晚 18-24")
     f["dur_bucket"] = ("短 <5min" if dur < 300 else "中 5-12min" if dur < 720 else "长 >12min")
+
+    # —— 平台增值字段(有才加,scan_signals 对缺字段的视频自动跳过) ——
+    if v.get("tags") is not None:                        # YouTube:创作者自填的 SEO 标签
+        f["n_tags"] = len(v.get("tags") or [])
+    coin, fav = v.get("coin"), v.get("favorite")
+    if coin is not None or fav is not None:              # B站:跑过 enrich_bilibili.py 才有三连
+        f["triple_per_10k"] = (like + (coin or 0) + (fav or 0)) / (play / 1e4) if play else 0
+        f["coin_per_10k"] = (coin or 0) / (play / 1e4) if play else 0
 
     # —— 封面图像特征(仅当 fetch_covers.py 算过、且已 merge 进 v 时才加) ——
     cov = v.get("cover") or {}
@@ -111,6 +122,10 @@ BINARY_LABELS = {
 }
 CAT_LABELS = {"dur_bucket": "视频时长档", "daypart": "发布时段"}
 NUMERIC_LABELS = {"duration_sec": "时长(秒)", "title_len": "标题字数", "hour": "发布小时",
+                  "danmaku_per_comment": "弹幕/评论比(陪伴vs讨论)",
+                  "n_tags": "标签数(YouTube tags)",
+                  "triple_per_10k": "三连率(赞+币+藏/万播放)",
+                  "coin_per_10k": "投币率(币/万播放)",
                   "cover_brightness": "封面亮度", "cover_saturation": "封面饱和度",
                   "cover_contrast": "封面对比度", "cover_colorfulness": "封面色彩丰富度",
                   "cover_edge": "封面繁简(边缘密度)", "cover_warm": "封面暖色占比"}
@@ -121,4 +136,5 @@ METRIC_LABELS = {
     "play":           "总播放",
     "comment_per_10k":"互动率(评论/万播放)",
     "danmaku_per_min":"弹幕密度(条/分钟)",
+    "like_per_10k":   "点赞率(赞/万播放)",
 }

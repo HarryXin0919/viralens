@@ -31,8 +31,13 @@ class VideoRecord(TypedDict, total=False):
     play: Optional[int]     # 播放 / views
     comment: Optional[int]
     danmaku: Optional[int]  # B 站弹幕数(YouTube 无)
-    like: Optional[int]     # YouTube 点赞(B 站这里不填)
+    like: Optional[int]     # 点赞:YouTube 原生;B 站跑 enrich_bilibili.py 后补全
     tid: Optional[int]      # B 站分区 id
+    tags: list              # YouTube:创作者自填标签(B 站记录无此字段)
+    category_id: Optional[str]   # YouTube 官方分类 id
+    coin: Optional[int]     # B 站投币(enrich_bilibili.py 补全)
+    favorite: Optional[int] # B 站收藏(enrich_bilibili.py 补全)
+    share: Optional[int]    # B 站分享(enrich_bilibili.py 补全)
 
 
 def video_url(v) -> str:

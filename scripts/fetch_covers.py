@@ -22,6 +22,7 @@ import sys
 import io
 import time
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import numpy as np
 from PIL import Image
@@ -92,20 +93,30 @@ def main():
         cp = DATA / f"{c['alias']}_covers.json"
         cache = json.loads(cp.read_text(encoding="utf-8")) if cp.exists() else {}
 
-        n_new = n_fail = 0
-        for v in vids:
-            bvid, url = v.get("bvid"), v.get("cover_url")
-            if not bvid or not url or bvid in cache:
-                continue
+        jobs = [(v.get("bvid"), v.get("cover_url")) for v in vids
+                if v.get("bvid") and v.get("cover_url") and v.get("bvid") not in cache]
+
+        def work(bvid, url):
             try:
-                cache[bvid] = metrics(fetch_img(url))
-                n_new += 1
-                time.sleep(0.15)
+                return bvid, metrics(fetch_img(url)), None
             except Exception as e:
-                n_fail += 1
-                print(f"    · 失败 {bvid}: {e}")
-            if n_new and n_new % 10 == 0:                  # 边下边存,中断不丢
-                cp.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
+                return bvid, None, e
+
+        # 封面是公开 CDN(B站/YouTube 图床),6 路并发温和且无需登录态;指标计算在线程里顺便做了
+        n_new = n_fail = 0
+        if jobs:
+            with ThreadPoolExecutor(max_workers=min(6, len(jobs))) as ex:
+                futs = [ex.submit(work, bvid, url) for bvid, url in jobs]
+                for fut in as_completed(futs):
+                    bvid, m, err = fut.result()
+                    if err is not None:
+                        n_fail += 1
+                        print(f"    · 失败 {bvid}: {err}")
+                        continue
+                    cache[bvid] = m
+                    n_new += 1
+                    if n_new % 10 == 0:                    # 边下边存,中断不丢
+                        cp.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
         cp.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"  ✓ {c['name']}: 封面 {len(cache)}/{len(vids)} (新增 {n_new}, 失败 {n_fail})")
 

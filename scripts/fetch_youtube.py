@@ -17,6 +17,7 @@ channel 支持三种写法:
 import json
 import re
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -26,7 +27,35 @@ from datetime import datetime
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
+from runtime import DATA
+
 API = "https://www.googleapis.com/youtube/v3"
+
+# 频道解析缓存:@handle → channelId/uploads 播放列表 id 不会变,解析一次就存盘,
+# 后续每次运行省 2 个请求/频道(名字搜索兜底路径更是 100 配额/次)。
+_CHANNEL_CACHE = DATA / "yt_channel_cache.json"
+_CACHE_LOCK = threading.Lock()    # fetch_multi 多线程并发抓 YouTube,读改写要锁
+
+
+def _cache_get(key):
+    with _CACHE_LOCK:
+        try:
+            return json.loads(_CHANNEL_CACHE.read_text(encoding="utf-8")).get(key)
+        except Exception:
+            return None
+
+
+def _cache_put(key, val):
+    with _CACHE_LOCK:
+        try:
+            cache = json.loads(_CHANNEL_CACHE.read_text(encoding="utf-8"))
+        except Exception:
+            cache = {}
+        cache[key] = val
+        try:
+            _CHANNEL_CACHE.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
+        except Exception:
+            pass   # 缓存写不进(只读盘等)不致命,下次重新解析就是
 
 
 class YouTubeError(Exception):
@@ -167,8 +196,13 @@ def fetch_creator(c, api_key, num=40):
         raise YouTubeError("没读到 YOUTUBE_API_KEY(在 config_local.py 里加一行 YOUTUBE_API_KEY = \"你的key\")")
     channel = c.get("channel") or c.get("uid") or c.get("name")
     min_dur = int(c.get("min_duration_sec", 60))
-    cid = _resolve_channel_id(str(channel), api_key)
-    uploads = _uploads_playlist(cid, api_key)
+    cached = _cache_get(str(channel))
+    if cached and cached.get("cid") and cached.get("uploads"):
+        cid, uploads = cached["cid"], cached["uploads"]
+    else:
+        cid = _resolve_channel_id(str(channel), api_key)
+        uploads = _uploads_playlist(cid, api_key)
+        _cache_put(str(channel), {"cid": cid, "uploads": uploads})
     # Shorts 比例高的频道一次拿不够 num 条长视频,多拉 8 倍兜底(quota 也只翻几倍,远低于日额)
     raw_num = num * 8 if min_dur > 0 else num
     vids = _recent_video_ids(uploads, api_key, raw_num)
@@ -200,6 +234,9 @@ def fetch_creator(c, api_key, num=40):
             "like": int(stats.get("likeCount", 0) or 0),   # 附赠字段;B站表没有,下游忽略
             "danmaku": 0,                                  # YouTube 没有弹幕
             "tid": None,
+            # 同一次 videos.list 免费带出,不多花配额:标签(创作者自填的 SEO 词)+ 官方分类
+            "tags": snip.get("tags") or [],
+            "category_id": snip.get("categoryId"),
         })
         if len(videos) >= num:
             break

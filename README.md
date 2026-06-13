@@ -206,6 +206,7 @@ python scripts/scan_signals.py       # scan every dimension at once (try: scan_s
 python scripts/charts.py             # draw the README charts
 python scripts/compare_meme.py       # (opt-in, slow) cross-creator comment-engagement test
 python scripts/fetch_covers.py       # (opt-in, slow) cover-image metrics
+python scripts/enrich_bilibili.py    # (opt-in) Bilibili likes/coins/favorites → "triple rate" — the hardest engagement signal on the platform
 ```
 
 Don't know a Bilibili creator's UID? Run `python scripts/resolve_creators.py` — it searches by
@@ -272,6 +273,13 @@ rate-limit · small *n* is reported as *"weak signal,"* never dressed up as proo
 - [x] One-command front door — `python viralens.py` (just the data → CSV/JSON) · `--report` (data + full analysis + report)
 - [x] Self-contained interactive HTML report — `reports/index.html`
 - [x] Downloadable desktop app for Windows / macOS / Linux — no Python install needed ([releases](https://github.com/HarryXin0919/viralens/releases/latest))
+- [x] Concurrent fetching — YouTube channels in parallel while Bilibili paces itself politely (4× faster on mixed rosters)
+- [x] Bilibili "triple" enrichment — likes / coins / favorites → **triple-rate** dimension (opt-in `enrich_bilibili.py`); no other OSS tool computes this
+- [x] YouTube tags + category captured per video → tag-count dimension
+- [ ] Posting-time heatmap (weekday × hour vs plays) and golden-duration curve per zone
+- [ ] Incremental fetch — stop paging at the first already-seen video
+- [ ] Comment / danmaku layer — common vs signature vs divergent words across hit/flop groups
+- [ ] `pip install viralens` (PyPI) · demo GIF in README · hosted sample report
 - [ ] Per-creator (not keyword-based) signature-form definition
 - [ ] Opt-in LLM layer for qualitative "why this form works" summaries
 
